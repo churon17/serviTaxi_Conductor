@@ -2,6 +2,7 @@ package jeancarlosdev.servitaxi_conductor;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -58,13 +59,97 @@ public class Login_1 extends AppCompatActivity {
                 mostrarVentanaRegistro();
             }
         });
+
+        btnSignIn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mostrarVentanaLogin();
+            }
+        });
+    }
+
+    private void mostrarVentanaLogin() {
+        AlertDialog.Builder dialogInicio = new AlertDialog.Builder(this);
+
+        dialogInicio.setTitle("Inicio de Sesion");
+
+        dialogInicio.setMessage("Inicio de sesion conductor ServiTaxi");
+
+        LayoutInflater inflater = LayoutInflater.from(this);
+
+        View inicioSesion_layout = inflater.
+                inflate(R.layout.layout_inicio_sesion, null);
+
+        final MaterialEditText etxtEmailInicio = inicioSesion_layout.
+                findViewById(R.id.etxtEmail);
+
+        final MaterialEditText etxtContrasenaInicio = inicioSesion_layout.
+                findViewById(R.id.etxtContrasena);
+
+
+        dialogInicio.setView(inicioSesion_layout);
+
+        dialogInicio.setPositiveButton("INICIAR SESION", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+                dialogInterface.dismiss();
+
+                if(TextUtils.isEmpty(etxtEmailInicio.getText().toString())){
+
+                    Snackbar.make(layoutPrincipal,
+                            "Por favor ingrese una direccion de correo " +
+                                    "electronico",
+                            Snackbar.LENGTH_SHORT).show();
+
+                    return;
+                }
+
+                if(TextUtils.isEmpty(etxtContrasenaInicio.getText().toString())){
+
+                    Snackbar.make(layoutPrincipal,
+                            "Por favor ingrese contrasena"
+                            , Snackbar.LENGTH_SHORT).show();
+
+                    return;
+                }
+
+                if(etxtContrasenaInicio.getText().toString().length() < 6){
+
+                    Snackbar.make(layoutPrincipal,
+                            "Contrasena demasiado corta ",
+                            Snackbar.LENGTH_SHORT).show();
+
+                    return;
+                }
+                //Autentificar con el servicio;
+
+                Toast.makeText(Login_1.this,
+                        "Agregar el metodo del servicio de Inicio de Sesion",
+                        Toast.LENGTH_SHORT).show();
+
+                startActivity(new Intent(Login_1.this, Main.class));
+                finish();
+
+            }
+        });
+
+
+        dialogInicio.setNegativeButton("CANCELAR", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+
+        dialogInicio.show();
+
     }
 
     private void mostrarVentanaRegistro() {
-
-        final AlertDialog.Builder dialog=  new AlertDialog.Builder(this);
-        dialog.setTitle("Registrar");
-        dialog.setMessage("Please use email to register");
+        AlertDialog.Builder dialog=  new AlertDialog.Builder(this);
+        dialog.setTitle("Registrar Conductor");
+        dialog.setMessage("Registro de Conductor ServiTaxi");
 
         LayoutInflater inflater = LayoutInflater.from(this);
 
@@ -101,6 +186,16 @@ public class Login_1 extends AppCompatActivity {
                     return;
                 }
 
+                if(TextUtils.isEmpty(etxtContrasena.getText().toString())){
+
+                    Snackbar.make(layoutPrincipal,
+                            "Por favor ingrese contrasena"
+                            , Snackbar.LENGTH_SHORT).show();
+
+                    return;
+                }
+
+
                 if(etxtContrasena.getText().toString().length() < 6){
 
                     Snackbar.make(layoutPrincipal,
@@ -130,7 +225,9 @@ public class Login_1 extends AppCompatActivity {
                     return;
                 }
 
-                Toast.makeText(getApplicationContext(), "Se ha guardado correctamente", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(),
+                        "Se ha guardado correctamente",
+                        Toast.LENGTH_SHORT).show();
 
               /*  auth.createUserWithEmailAndPassword(etxtEmail.getText().toString(),
                         etxtContrasena.getText().toString())
