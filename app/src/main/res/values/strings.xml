@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">serviTaxi_Conductor</string>
+    <string name="title_activity_bienvenido">Map</string>
 </resources>

@@ -19,6 +19,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.rengwuxian.materialedittext.MaterialEditText;
 
+import dmax.dialog.SpotsDialog;
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
@@ -89,11 +90,17 @@ public class Login_1 extends AppCompatActivity {
 
         dialogInicio.setView(inicioSesion_layout);
 
-        dialogInicio.setPositiveButton("INICIAR SESION", new DialogInterface.OnClickListener() {
+        dialogInicio.setPositiveButton("INICIAR SESION",
+                new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
 
                 dialogInterface.dismiss();
+
+                btnSignIn.setEnabled(false);
+
+                /*Desactivo el boton de inicio de Sesion
+                * para que el usuario no este manipulando*/
 
                 if(TextUtils.isEmpty(etxtEmailInicio.getText().toString())){
 
@@ -124,11 +131,24 @@ public class Login_1 extends AppCompatActivity {
                 }
                 //Autentificar con el servicio;
 
+                android.app.AlertDialog dialogoEspera = new SpotsDialog(Login_1.this);
+
+                dialogoEspera.show();
+
+
                 Toast.makeText(Login_1.this,
                         "Agregar el metodo del servicio de Inicio de Sesion",
                         Toast.LENGTH_SHORT).show();
 
-                startActivity(new Intent(Login_1.this, Main.class));
+                /*Parar Dialogo de espera*/
+
+                dialogoEspera.dismiss();
+
+                btnSignIn.setEnabled(true);
+                /*Activo para que vuelva a la normalidad,
+                * luego de que haya cumplido alguna accion*/
+
+                startActivity(new Intent(Login_1.this, Bienvenido.class));
                 finish();
 
             }
