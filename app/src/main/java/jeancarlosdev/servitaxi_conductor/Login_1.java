@@ -3,29 +3,39 @@ package jeancarlosdev.servitaxi_conductor;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.rengwuxian.materialedittext.MaterialEditText;
 
 import dmax.dialog.SpotsDialog;
+import jeancarlosdev.servitaxi_conductor.Modelos.Conductor;
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class Login_1 extends AppCompatActivity {
 
     Button btnSignIn, btnRegister;
+
+    FirebaseDatabase db;
+
+    DatabaseReference conductores;
 
     RelativeLayout layoutPrincipal;
 
@@ -47,6 +57,9 @@ public class Login_1 extends AppCompatActivity {
 
         auth = FirebaseAuth.getInstance();
 
+        db = FirebaseDatabase.getInstance();
+
+        conductores = db.getReference("Conductores");
 
         btnSignIn = (Button)findViewById(R.id.btnIniciar);
 
@@ -70,7 +83,7 @@ public class Login_1 extends AppCompatActivity {
     }
 
     private void mostrarVentanaLogin() {
-        AlertDialog.Builder dialogInicio = new AlertDialog.Builder(this);
+        final AlertDialog.Builder dialogInicio = new AlertDialog.Builder(this);
 
         dialogInicio.setTitle("Inicio de Sesion");
 
@@ -129,27 +142,37 @@ public class Login_1 extends AppCompatActivity {
 
                     return;
                 }
-                //Autentificar con el servicio;
-
-                android.app.AlertDialog dialogoEspera = new SpotsDialog(Login_1.this);
+                final android.app.AlertDialog dialogoEspera = new SpotsDialog(Login_1.this);
 
                 dialogoEspera.show();
 
+                auth.signInWithEmailAndPassword(etxtEmailInicio.getText().toString(),
+                        etxtContrasenaInicio.getText().toString())
+                        .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                            @Override
+                            public void onSuccess(AuthResult authResult) {
+                                dialogoEspera.dismiss();
+                                startActivity(new Intent(Login_1.this
+                                        , Bienvenido.class));
 
-                Toast.makeText(Login_1.this,
-                        "Agregar el metodo del servicio de Inicio de Sesion",
-                        Toast.LENGTH_SHORT).show();
+                                finish();
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        dialogoEspera.dismiss();
+                        Snackbar.make(layoutPrincipal,
+                                "Error" +e.getMessage(),
+                                Snackbar.LENGTH_SHORT).show();
 
-                /*Parar Dialogo de espera*/
+                        btnSignIn.setEnabled(true);
 
-                dialogoEspera.dismiss();
+                        btnSignIn.setEnabled(true);
+                    }
+                });
 
-                btnSignIn.setEnabled(true);
-                /*Activo para que vuelva a la normalidad,
-                * luego de que haya cumplido alguna accion*/
+                //Autentificar con el servicio;
 
-                startActivity(new Intent(Login_1.this, Bienvenido.class));
-                finish();
 
             }
         });
@@ -249,18 +272,55 @@ public class Login_1 extends AppCompatActivity {
                         "Se ha guardado correctamente",
                         Toast.LENGTH_SHORT).show();
 
-              /*  auth.createUserWithEmailAndPassword(etxtEmail.getText().toString(),
-                        etxtContrasena.getText().toString())
+                auth.createUserWithEmailAndPassword(
+                        etxtEmail.getText().toString(),
+                        etxtContrasena.getText().toString()
+                )
                         .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                            @Override
+                            public void onSuccess(AuthResult authResult) {
+                                //Guardar Usuario en la base de datos.
+
+                                Conductor conductor = new Conductor();
+
+                                conductor.setEmail(etxtEmail.getText().toString());
+                                conductor.setPassword(etxtContrasena.getText().toString());
+                                conductor.setNombre(etxtNombre.getText().toString());
+                                conductor.setPhone(etxtTelefono.getText().toString());
+
+                                //Usamos al email como llave primaria.
+                                conductores.child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                                .setValue(conductor)
+                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+
+                                        Snackbar.make(layoutPrincipal,
+                                                "Conductor Registrado correctamente",
+                                                Snackbar.LENGTH_SHORT ).show();
+
+
+                                    }
+                                })
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+
+                                        Snackbar.make(layoutPrincipal,
+                                                "Conductor no registrado " + e.getMessage(),
+                                                Snackbar.LENGTH_SHORT ).show();
+
+                                    }
+                                });
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
                     @Override
-                    public void onSuccess(AuthResult authResult) {
-
-                        //Se ha guardado correctamente el Chofer.
-
-
-
+                    public void onFailure(@NonNull Exception e) {
+                        Snackbar.make(layoutPrincipal,
+                                "Conductor no registrado" + e.getMessage(),
+                                Snackbar.LENGTH_SHORT ).show();
                     }
-                }); */
+                });
             }
         });
 
