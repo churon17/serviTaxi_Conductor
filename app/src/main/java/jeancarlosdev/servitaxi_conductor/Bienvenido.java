@@ -106,6 +106,12 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
 
     private IGoogleAPI mService;
 
+    boolean isDriverFound = false;
+
+    String driverId = "";
+
+    int radius = 1; // 1km
+
     //region Animacion del Carro Atributos.
     private List<LatLng> polyLineList;
 
@@ -130,9 +136,13 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
 
     private Polyline blackPolyline, greypoPolyline;
 
+
+
     //endregion
 
     //endregion
+
+    //region Runnable
 
     Runnable drawPathRunnable = new Runnable() {
         @Override
@@ -188,7 +198,7 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
                 handler.postDelayed(this, 3000);
         }
     };
-
+    //endregion
 
     //Posicion Vehiculo en movimiento.
     private float getBearing(LatLng startPosition, LatLng endPosition) {
@@ -573,6 +583,10 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
 
     }
 
+
+
+
+
     //endregion
 
     @Override
@@ -621,7 +635,7 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
             }
         });
 
-        conductores = FirebaseDatabase.getInstance().getReference("Drivers");
+        conductores = FirebaseDatabase.getInstance().getReference(Common.drivers_tb1);
 
         geoFire = new GeoFire(conductores);
 

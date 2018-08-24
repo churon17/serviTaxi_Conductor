@@ -25,6 +25,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.rengwuxian.materialedittext.MaterialEditText;
 
 import dmax.dialog.SpotsDialog;
+import jeancarlosdev.servitaxi_conductor.Common.Common;
 import jeancarlosdev.servitaxi_conductor.Modelos.Conductor;
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
@@ -59,7 +60,7 @@ public class Login_1 extends AppCompatActivity {
 
         db = FirebaseDatabase.getInstance();
 
-        conductores = db.getReference("Conductores");
+        conductores = db.getReference(Common.conductor_tb1);
 
         btnSignIn = (Button)findViewById(R.id.btnIniciar);
 
