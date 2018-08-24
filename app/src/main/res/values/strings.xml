@@ -1,5 +1,10 @@
 <resources>
     <string name="app_name">serviTaxi_Conductor</string>
     <string name="title_activity_bienvenido">Map</string>
+
+
+    <!--
     <string name="google_direction_api">AIzaSyB_Vu9oDHOCiXSJqXkGGcLthGsHssKzTpM</string>
+    -->
+    <string name="google_direction_api">AIzaSyCi0nLNKFHrboKpobMFXvNfnOyST64tXWM</string>
 </resources>
