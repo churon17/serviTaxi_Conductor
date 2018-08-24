@@ -16,6 +16,9 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.AuthResult;
@@ -24,9 +27,17 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.rengwuxian.materialedittext.MaterialEditText;
 
+import java.util.HashMap;
+
 import dmax.dialog.SpotsDialog;
 import jeancarlosdev.servitaxi_conductor.Common.Common;
+import jeancarlosdev.servitaxi_conductor.Modelos.ClienteBackJson;
 import jeancarlosdev.servitaxi_conductor.Modelos.Conductor;
+import jeancarlosdev.servitaxi_conductor.Modelos.MensajeBackJson;
+import jeancarlosdev.servitaxi_conductor.Remote.Conexion;
+import jeancarlosdev.servitaxi_conductor.Remote.VolleyPeticion;
+import jeancarlosdev.servitaxi_conductor.Remote.VolleyProcesadorResultado;
+import jeancarlosdev.servitaxi_conductor.Remote.VolleyTiposError;
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
@@ -41,6 +52,12 @@ public class Login_1 extends AppCompatActivity {
     RelativeLayout layoutPrincipal;
 
     FirebaseAuth auth;
+
+    private RequestQueue requestQueue;
+
+    boolean guardo = false;
+
+    boolean inicioSesion = false;
 
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -147,6 +164,14 @@ public class Login_1 extends AppCompatActivity {
 
                 dialogoEspera.show();
 
+                HashMap<String, String> mapa = new HashMap<>();
+
+                mapa.put("correo", etxtEmailInicio.getText().toString());
+
+                mapa.put("clave", etxtContrasenaInicio.getText().toString());
+
+                //IniciarSesion.
+
                 auth.signInWithEmailAndPassword(etxtEmailInicio.getText().toString(),
                         etxtContrasenaInicio.getText().toString())
                         .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
@@ -171,10 +196,6 @@ public class Login_1 extends AppCompatActivity {
                         btnSignIn.setEnabled(true);
                     }
                 });
-
-                //Autentificar con el servicio;
-
-
             }
         });
 
@@ -334,5 +355,111 @@ public class Login_1 extends AppCompatActivity {
         });
 
         dialog.show();
+    }
+
+    private boolean registrarCliente(
+            @NonNull HashMap<String, String> map){
+
+        VolleyPeticion<MensajeBackJson> registrar = Conexion.registrarCliente(
+                getApplicationContext(),
+                map,
+                new Response.Listener<MensajeBackJson>() {
+                    @Override
+                    public void onResponse(MensajeBackJson response) {
+                        if(response != null  && response.siglas.equalsIgnoreCase("FD")){
+
+                            Snackbar.make(layoutPrincipal,
+                                    "Error " + response.mensaje,
+                                    Snackbar.LENGTH_SHORT
+                            ).show();
+
+                            btnSignIn.setEnabled(true);
+
+                            guardo = true;
+
+                            return;
+
+                        }else{
+
+                            Snackbar.make(layoutPrincipal,
+                                    "Correcto, " +response.mensaje,
+                                    Snackbar.LENGTH_SHORT).show();
+
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                        VolleyTiposError errors = VolleyProcesadorResultado.parseErrorResponse(error);
+
+                        Log.e("Error", error.toString());
+
+                        Snackbar.make(layoutPrincipal,
+                                errors.errorMessage,
+                                Snackbar.LENGTH_SHORT).show();
+
+                        return;
+                    }
+                }
+        );
+
+        requestQueue.add(registrar);
+        return guardo;
+    }
+
+    private boolean iniciarSesionCliente(
+            @NonNull HashMap<String, String> map){
+
+        VolleyPeticion<ClienteBackJson> inicio = Conexion.iniciarSesion(
+                getApplicationContext(),
+                map,
+                new Response.Listener<ClienteBackJson>() {
+                    @Override
+                    public void onResponse(ClienteBackJson response) {
+
+                        if(response != null
+                                && response.siglas.equalsIgnoreCase("ND")){
+
+                            Snackbar.make(layoutPrincipal,
+                                    "Error " + response.mensaje,
+                                    Snackbar.LENGTH_SHORT
+                            ).show();
+
+                            btnSignIn.setEnabled(true);
+
+                            return;
+
+                        }else {
+
+                            Snackbar.make(layoutPrincipal,
+                                    "Bienvenido, " + response.nombre,
+                                    Snackbar.LENGTH_SHORT).show();
+
+                            inicioSesion = true;
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                        VolleyTiposError errors = VolleyProcesadorResultado.parseErrorResponse(error);
+
+                        Log.e("Error", error.toString());
+
+                        Snackbar.make(layoutPrincipal,
+                                errors.errorMessage,
+                                Snackbar.LENGTH_SHORT).show();
+
+                        return;
+                    }
+                }
+        );
+
+        requestQueue.add(inicio);
+
+        return  inicioSesion;
     }
 }

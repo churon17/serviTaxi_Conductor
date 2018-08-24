@@ -639,8 +639,6 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
 
         geoFire = new GeoFire(conductores);
 
-
-
         polyLineList = new ArrayList<>();
 
         //Places Api
