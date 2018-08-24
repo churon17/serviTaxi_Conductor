@@ -76,7 +76,6 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.OnConnectionFailedListener,
         com.google.android.gms.location.LocationListener
 {
-
     //region Atributos
     private GoogleMap mMap;
 
@@ -254,14 +253,8 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
                 if(location_switch.isChecked()){
                     displayLocation();
                 }
-
             }
-
-
         }
-
-
-
     }
 
     private void createLocationRequest() {
@@ -324,7 +317,6 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
 
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient,
                 (com.google.android.gms.location.LocationListener) this);
-
     }
 
     private void displayLocation() {
@@ -340,9 +332,18 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
             return;
         }
 
-        Common.mUltimaUbicacion = LocationServices.
-                FusedLocationApi.
-                getLastLocation(mGoogleApiClient);
+       Common.mUltimaUbicacion = LocationServices.
+              FusedLocationApi.
+            getLastLocation(mGoogleApiClient);
+
+      //  Location location = new Location("");
+
+        //location.setLatitude(-4.02695490724033);
+
+        //location.setLongitude(-79.20271825947566);
+
+        //Common.mUltimaUbicacion = location;
+
 
         if(Common.mUltimaUbicacion != null){
             if(location_switch.isChecked()){
