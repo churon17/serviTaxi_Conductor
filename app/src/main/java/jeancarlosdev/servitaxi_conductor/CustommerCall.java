@@ -97,6 +97,7 @@ public class CustommerCall extends AppCompatActivity {
                 //Enviar localizacion del Cliente a una nueva actividad.
                 intencion.putExtra("lat", lat);
                 intencion.putExtra("lng", lng);
+                intencion.putExtra("customerId", customerId);
 
                 startActivity(intencion);
                 finish();

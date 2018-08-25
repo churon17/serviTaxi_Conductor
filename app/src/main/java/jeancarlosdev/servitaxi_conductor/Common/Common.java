@@ -2,6 +2,7 @@ package jeancarlosdev.servitaxi_conductor.Common;
 
 import android.location.Location;
 
+import jeancarlosdev.servitaxi_conductor.Modelos.Conductor;
 import jeancarlosdev.servitaxi_conductor.Remote.FCMClient;
 import jeancarlosdev.servitaxi_conductor.Remote.IFCMService;
 import jeancarlosdev.servitaxi_conductor.Remote.IGoogleAPI;
@@ -14,6 +15,8 @@ public class Common {
     public static final String drivers_tb1 = "Drivers";
     public static final String solicitud_tb1 = "Solicitud";
     public static final String token_tb1 = "Tokens";
+
+    public static Conductor currentUser;
 
     public static Location mUltimaUbicacion = null;
 

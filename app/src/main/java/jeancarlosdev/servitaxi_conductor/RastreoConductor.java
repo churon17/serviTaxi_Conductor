@@ -20,6 +20,8 @@ import android.widget.Toast;
 
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
+import com.firebase.geofire.GeoQuery;
+import com.firebase.geofire.GeoQueryEventListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -44,6 +46,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.SquareCap;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.JsonObject;
 
 import org.json.JSONArray;
@@ -55,6 +58,11 @@ import java.util.List;
 
 import jeancarlosdev.servitaxi_conductor.Common.Common;
 import jeancarlosdev.servitaxi_conductor.Helper.DirectionJSONParser;
+import jeancarlosdev.servitaxi_conductor.Modelos.FCMResponse;
+import jeancarlosdev.servitaxi_conductor.Modelos.Notification;
+import jeancarlosdev.servitaxi_conductor.Modelos.Sender;
+import jeancarlosdev.servitaxi_conductor.Modelos.Token;
+import jeancarlosdev.servitaxi_conductor.Remote.IFCMService;
 import jeancarlosdev.servitaxi_conductor.Remote.IGoogleAPI;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -71,6 +79,8 @@ public class RastreoConductor extends FragmentActivity implements OnMapReadyCall
     double riderLat;
 
     double riderLng;
+
+    String customerId;
 
     private static final int PLAY_SERVICE_REQUEST_CODE = 7778;
 
@@ -92,6 +102,10 @@ public class RastreoConductor extends FragmentActivity implements OnMapReadyCall
 
     IGoogleAPI mService;
 
+    IFCMService mFCMService;
+
+    GeoFire geoFire;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,9 +120,12 @@ public class RastreoConductor extends FragmentActivity implements OnMapReadyCall
 
             riderLat = getIntent().getDoubleExtra("lat", -1.0);
             riderLng = getIntent().getDoubleExtra("lng", -1.0);
+            customerId = getIntent().getStringExtra("customerId");
         }
 
         mService = Common.getIGoogleAPI();
+        mFCMService = Common.getFCMService();
+
         setUpLocation();
     }
 
@@ -119,11 +136,62 @@ public class RastreoConductor extends FragmentActivity implements OnMapReadyCall
 
         riderMarker = mMap.addCircle(new CircleOptions()
         .center(new LatLng(riderLat, riderLng))
-        .radius(10)
+        .radius(50) // 50m de radio
         .strokeColor(Color.BLUE)
         .fillColor(0x220000FF)
         .strokeWidth(5.0f));
+
+        geoFire = new GeoFire(FirebaseDatabase.getInstance().getReference(Common.drivers_tb1));
+        GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(riderLat, riderLng), 0.05f);
+        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+            @Override
+            public void onKeyEntered(String key, GeoLocation location) {
+                sendArriveNotification(customerId);
+            }
+
+            @Override
+            public void onKeyExited(String key) {
+
+            }
+
+            @Override
+            public void onKeyMoved(String key, GeoLocation location) {
+
+            }
+
+            @Override
+            public void onGeoQueryReady() {
+
+            }
+
+            @Override
+            public void onGeoQueryError(DatabaseError error) {
+
+            }
+        });
     }
+
+        private void sendArriveNotification(String customerId) {
+            Token token = new Token(customerId);
+            Notification notification = new Notification("Llegada", String.format("El conductor %s ha llegado", Common.currentUser.getNombre()));
+
+            Sender sender = new Sender(token.getToken(), notification);
+
+            mFCMService.sendMessage(sender).enqueue(new Callback<FCMResponse>() {
+                @Override
+                public void onResponse(Call<FCMResponse> call, Response<FCMResponse> response) {
+                    if (response.body().success != 1){
+                        Toast.makeText(RastreoConductor.this, "Fallo", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<FCMResponse> call, Throwable t) {
+
+                }
+            });
+
+        }
 
         @Override
         public void onConnected(@Nullable Bundle bundle) {
