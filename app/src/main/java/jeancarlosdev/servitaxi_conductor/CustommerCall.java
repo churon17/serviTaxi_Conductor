@@ -57,6 +57,8 @@ public class CustommerCall extends AppCompatActivity {
 
     String customerId;
 
+    String tiempo = "";
+
     Double lat;
 
     Double lng;
@@ -83,7 +85,7 @@ public class CustommerCall extends AppCompatActivity {
 
                 if(!TextUtils.isEmpty(customerId)){
 
-                    cancelBooking(customerId);
+                    notificationBooking(customerId, "Lo sentimos", "El conductor no puede procesar tu solicitud en este momento");
                 }
             }
         });
@@ -98,6 +100,11 @@ public class CustommerCall extends AppCompatActivity {
                 intencion.putExtra("lat", lat);
                 intencion.putExtra("lng", lng);
                 intencion.putExtra("customerId", customerId);
+
+                if(!TextUtils.isEmpty(customerId)) {
+                    notificationBooking(customerId, "Aceptado", "El Taxi llegará en " + tiempo);
+                    tiempo = "";
+                }
 
                 startActivity(intencion);
                 finish();
@@ -119,11 +126,10 @@ public class CustommerCall extends AppCompatActivity {
 
     }
 
-    private void cancelBooking(String customerId) {
+    private void notificationBooking(String customerId, String title, String body) {
         Token token = new Token(customerId);
 
-        Notification  notification = new Notification("Lo sentimos",
-                "El conductor no puede procesar tu solicitud en este momento");
+        Notification  notification = new Notification(title, body);
 
         Sender sender = new Sender(token.getToken(), notification);
 
@@ -188,6 +194,7 @@ public class CustommerCall extends AppCompatActivity {
 
                         JSONObject time = legsObject.getJSONObject("duration");
                         txt_time.setText(time.getString("text"));
+                        tiempo = time.getString("text");
 
                         String address = legsObject.getString("end_address");
                         txt_address.setText(address);
