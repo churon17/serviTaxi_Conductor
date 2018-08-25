@@ -50,4 +50,36 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_centerHorizontal="true"
+        android:orientation="horizontal"
+        android:weightSum="2"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/btnAceptar"
+            android:background="@drawable/btn_aceptar"
+            android:textColor="@android:color/white"
+            android:text="ACEPTAR"
+            android:layout_weight="1"
+            android:layout_marginRight="6dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+
+        <Button
+            android:id="@+id/btnRechazar"
+            android:background="@drawable/btn_rechazar"
+            android:textColor="@color/txtColorAceptar"
+            android:text="RECHAZAR"
+            android:layout_weight="1"
+            android:layout_marginLeft="6dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
 </RelativeLayout>

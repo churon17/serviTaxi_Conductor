@@ -1,13 +1,17 @@
 package jeancarlosdev.servitaxi_conductor;
 
 import android.animation.ValueAnimator;
+import android.content.Intent;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 import android.view.animation.LinearInterpolator;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,6 +31,10 @@ import org.json.JSONObject;
 import java.util.List;
 
 import jeancarlosdev.servitaxi_conductor.Common.Common;
+import jeancarlosdev.servitaxi_conductor.Modelos.FCMResponse;
+import jeancarlosdev.servitaxi_conductor.Modelos.Notification;
+import jeancarlosdev.servitaxi_conductor.Modelos.Sender;
+import jeancarlosdev.servitaxi_conductor.Modelos.Token;
 import jeancarlosdev.servitaxi_conductor.Remote.IFCMService;
 import jeancarlosdev.servitaxi_conductor.Remote.IGoogleAPI;
 import retrofit2.Call;
@@ -37,9 +45,21 @@ public class CustommerCall extends AppCompatActivity {
 
     TextView txt_time, txt_address, txt_distance;
 
+    Button btnAceptar;
+
+    Button btnCancelar;
+
     MediaPlayer mediaPlayer;
 
     IGoogleAPI mService;
+
+    IFCMService mFCMService;
+
+    String customerId;
+
+    Double lat;
+
+    Double lng;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,9 +68,40 @@ public class CustommerCall extends AppCompatActivity {
 
         mService = Common.getIGoogleAPI();
 
+        mFCMService = Common.getFCMService();
+
         txt_time = (TextView) findViewById(R.id.txt_time);
         txt_address = (TextView) findViewById(R.id.txt_address);
         txt_distance = (TextView) findViewById(R.id.txt_distance);
+
+        btnAceptar = findViewById(R.id.btnAceptar);
+        btnCancelar = findViewById(R.id.btnRechazar);
+
+        btnCancelar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if(!TextUtils.isEmpty(customerId)){
+
+                    cancelBooking(customerId);
+                }
+            }
+        });
+
+        btnAceptar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intencion = new Intent(CustommerCall.this,
+                        RastreoConductor.class);
+
+                //Enviar localizacion del Cliente a una nueva actividad.
+                intencion.putExtra("lat", lat);
+                intencion.putExtra("lng", lng);
+
+                startActivity(intencion);
+                finish();
+            }
+        });
 
         mediaPlayer = MediaPlayer.create(this, R.raw.ringtone);
         mediaPlayer.setLooping(true);
@@ -58,11 +109,43 @@ public class CustommerCall extends AppCompatActivity {
 
 
         if (getIntent() != null){
-            double lat = getIntent().getDoubleExtra("lat", -1.0);
-            double lng = getIntent().getDoubleExtra("lng", -1.0);
+            lat = getIntent().getDoubleExtra("lat", -1.0);
+            lng = getIntent().getDoubleExtra("lng", -1.0);
+            customerId = getIntent().getStringExtra("customer");
 
             getDirection(lat, lng);
         }
+
+    }
+
+    private void cancelBooking(String customerId) {
+        Token token = new Token(customerId);
+
+        Notification  notification = new Notification("Lo sentimos",
+                "El conductor no puede procesar tu solicitud en este momento");
+
+        Sender sender = new Sender(token.getToken(), notification);
+
+        mFCMService.sendMessage(sender)
+                .enqueue(new Callback<FCMResponse>() {
+                    @Override
+                    public void onResponse(Call<FCMResponse> call,
+                                           Response<FCMResponse> response) {
+                        if(response.body().success ==1){
+                            Toast.makeText(CustommerCall.this,
+                                    "Cancelado",
+                                    Toast.LENGTH_SHORT);
+
+                            finish();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<FCMResponse> call,
+                                          Throwable t) {
+
+                    }
+                });
 
     }
 

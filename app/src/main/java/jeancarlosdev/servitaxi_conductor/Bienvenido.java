@@ -53,9 +53,11 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.SquareCap;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 
 import org.json.JSONArray;
@@ -136,6 +138,7 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
     private Polyline blackPolyline, greypoPolyline;
 
 
+    DatabaseReference onlineRef, currentUserRef;
 
     //endregion
 
@@ -599,6 +602,28 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        //Presense System
+
+        onlineRef = FirebaseDatabase.getInstance().getReference().child(".info/connected");
+
+        currentUserRef = FirebaseDatabase.getInstance().getReference(Common.drivers_tb1).child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+
+
+        onlineRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                //Quitaremos el valor del conductor en la base de datos cuando el conductor esta desconectado.
+                currentUserRef.onDisconnect().removeValue();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+
+
         location_switch = (MaterialAnimatedSwitch)findViewById(R.id.switch_location);
 
         location_switch.setOnCheckedChangeListener(
@@ -608,6 +633,10 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
 
                 if(isOnline){
 
+
+                    //Cambiamos a conectado cuando el Switch esta encendido.
+                    FirebaseDatabase.getInstance().goOnline();
+
                     Snackbar.make(mapFragment.getView(), "En linea", Snackbar.
                             LENGTH_SHORT).show();
 
@@ -616,6 +645,10 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
 
 
                 }else{
+
+                    //Cambiamos a desconectado cuando el Switch esta apagado.
+                    FirebaseDatabase.getInstance().goOffline();
+
 
                     Snackbar.make(mapFragment.getView(),
                             "Fuera de Linea", Snackbar.
@@ -764,8 +797,6 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
         mMap.setIndoorEnabled(false);
 
         mMap.getUiSettings().setZoomControlsEnabled(true);
-
-
 
     }
 

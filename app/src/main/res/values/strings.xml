@@ -7,4 +7,5 @@
     <string name="google_direction_api">AIzaSyB_Vu9oDHOCiXSJqXkGGcLthGsHssKzTpM</string>
     -->
     <string name="google_direction_api">AIzaSyCi0nLNKFHrboKpobMFXvNfnOyST64tXWM</string>
+    <string name="title_activity_rastreo_conductor">Map</string>
 </resources>
