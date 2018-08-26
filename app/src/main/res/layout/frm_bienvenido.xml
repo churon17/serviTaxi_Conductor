@@ -8,13 +8,92 @@
         android:layout_height = "match_parent"
         >
 
-    <LinearLayout
-        android:id="@+id/layout_panel"
-        android:orientation="horizontal"
+    <android.support.v7.widget.CardView
+        app:cardElevation="14dp"
         android:layout_width="match_parent"
-        android:weightSum="6"
-        android:layout_height="wrap_content">
-        
+        android:layout_alignParentTop="true"
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="@color/colorSecondary"
+        >
+
+        <com.github.glomadrian.materialanimatedswitch.MaterialAnimatedSwitch
+            android:layout_gravity="start|center_vertical"
+            android:id="@+id/switch_location"
+            android:layout_weight="3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+
+            app:icon_release="@drawable/location_off"
+            app:icon_press="@drawable/location_on"
+            app:base_release_color="@color/baseReleaseColor"
+            app:base_press_color="@color/basePressColor"
+            app:ball_release_color="@color/ballReleaseColor"
+            app:ball_press_color="@android:color/white"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorPrimary"
+            android:text="ServiTaxi"
+            android:textStyle="bold"
+            android:textSize="30dp"
+            android:layout_gravity="center"/>
+
+        <ImageButton
+            android:id="@+id/btn_find_user"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center_vertical|end"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="6dp"
+            android:layout_marginRight="8dp"
+            android:background="@drawable/btn_logout"
+            android:src="@drawable/logout"
+            android:scaleType="centerInside"
+            android:padding="10dp"/>
+
+
+        <!--
+        <Button
+            android:id="@+id/btn_find_user"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_margin="4dp"
+            android:layout_weight="10"
+            android:background="@drawable/btn_logout"
+            android:text="Cerrar Sesión"
+            android:textAlignment="center"
+            android:textColor="@android:color/white" />
+        -->
+
+    </android.support.v7.widget.CardView>
+
+
+
+
+
+
+    <fragment
+
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".Bienvenido" />
+
+
+
+    <android.support.v7.widget.CardView
+            app:cardElevation="18dp"
+            android:layout_width="match_parent"
+            android:layout_alignParentBottom="true"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            >
+
         <fragment
             android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"
             android:id="@+id/place_autocomplete_fragment"
@@ -22,81 +101,11 @@
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:layout_weight="5"></fragment>
-        
-        
-        
-      <!--  <EditText
-            android:id="@+id/edtPlace"
-            android:hint="Ingrese destino"
-            android:layout_weight="5"
-            android:layout_margin="10dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <Button
-            android:id="@+id/btnGo"
-            android:text="Ir"
-            android:layout_weight="1"         
-            android:layout_marginTop="10dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        
-         -->
-
-    </LinearLayout>
-    
-    
-    
-    
-    <fragment
-        android:layout_below="@+id/layout_panel"
-        android:id="@+id/map"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context=".Bienvenido" />
-
-    <android.support.v7.widget.CardView
-            app:cardElevation="10dp"
-            android:layout_width="match_parent"
-            android:layout_alignParentBottom="true"
-            android:layout_height="wrap_content">
-
-            <LinearLayout
-                android:orientation="horizontal"
-                android:weightSum="10"
-                android:layout_margin="16dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <com.github.glomadrian.materialanimatedswitch.MaterialAnimatedSwitch
-                    android:id="@+id/switch_location"
-                    android:layout_weight="3"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-
-                    app:icon_release="@drawable/location_off"
-                    app:icon_press="@drawable/location_on"
-                    app:base_release_color="@color/baseReleaseColor"
-                    app:base_press_color="@color/basePressColor"
-                    app:ball_release_color="@color/ballReleaseColor"
-                    app:ball_press_color="@android:color/white"
-                    />
-
-                <Button
-                    android:id="@+id/btn_find_user"
-                    android:layout_weight="7"
-                    android:textAlignment="center"
-                    android:text="ENCONTRAR USUARIO"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content" />
-
-            </LinearLayout>
 
 
         </android.support.v7.widget.CardView>
-        
-        
+
+
  </RelativeLayout>
     
     

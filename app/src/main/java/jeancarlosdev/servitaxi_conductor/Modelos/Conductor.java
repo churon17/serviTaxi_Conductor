@@ -8,7 +8,7 @@ public class Conductor {
 
     private String password;
 
-    private String phone;
+    private String apellido;
 
     public Conductor() {
     }
@@ -16,12 +16,12 @@ public class Conductor {
     public Conductor(String email,
                      String nombre,
                      String password,
-                     String phone) {
+                     String apellido) {
 
         this.email = email;
         this.nombre = nombre;
         this.password = password;
-        this.phone = phone;
+        this.apellido = apellido;
     }
 
     public String getEmail() {
@@ -48,11 +48,11 @@ public class Conductor {
         this.password = password;
     }
 
-    public String getPhone() {
-        return phone;
+    public String getApellido() {
+        return apellido;
     }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
+    public void setApellido(String apellido) {
+        this.apellido = apellido;
     }
 }

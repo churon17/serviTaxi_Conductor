@@ -317,8 +317,8 @@ public class Login_1 extends AppCompatActivity {
         final MaterialEditText etxtContrasena = register_Layout.findViewById(
                 R.id.etxtContrasena);
 
-        final MaterialEditText etxtTelefono = register_Layout.findViewById(
-                R.id.etxtTelefono);
+        final MaterialEditText etxtApellido = register_Layout.findViewById(
+                R.id.etxtApellido);
 
         final MaterialEditText etxtNombre = register_Layout.findViewById(
                 R.id.etxtNombre);
@@ -371,7 +371,7 @@ public class Login_1 extends AppCompatActivity {
                 }
 
 
-                if(TextUtils.isEmpty(etxtTelefono.getText().toString())){
+                if(TextUtils.isEmpty(etxtApellido.getText().toString())){
 
                     Snackbar.make(layoutPrincipal,
                             "Por favor ingrese su telefono de celular ",
@@ -398,7 +398,7 @@ public class Login_1 extends AppCompatActivity {
                                 conductor.setEmail(etxtEmail.getText().toString());
                                 conductor.setPassword(etxtContrasena.getText().toString());
                                 conductor.setNombre(etxtNombre.getText().toString());
-                                conductor.setPhone(etxtTelefono.getText().toString());
+                                conductor.setApellido(etxtApellido.getText().toString());
 
                                 //Usamos al email como llave primaria.
                                 conductores.child(FirebaseAuth.getInstance().getCurrentUser().getUid())

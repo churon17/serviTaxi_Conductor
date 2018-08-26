@@ -18,14 +18,14 @@
             android:hint="Ingrese su correo"
             android:inputType="textEmailAddress"
             android:text=""
-            android:textColor="@color/colorPrimary"
-            android:textColorHint="@color/colorPrimary"
+            android:textColor="@color/bottomText"
+            android:textColorHint="@color/bottomText"
             android:textSize="20sp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
 
             app:met_singleLineEllipsis="true"
-            app:met_baseColor="@color/colorPrimary"
+            app:met_baseColor="@color/bottomText"
             app:met_floatingLabel="highlight"
             app:met_primaryColor="@color/colorPrimary"
             />
@@ -35,14 +35,14 @@
             android:hint="Ingrese su contrasena"
             android:inputType="textPassword"
             android:text=""
-            android:textColor="@color/colorPrimary"
-            android:textColorHint="@color/colorPrimary"
+            android:textColor="@color/bottomText"
+            android:textColorHint="@color/bottomText"
             android:textSize="20sp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
 
             app:met_singleLineEllipsis="true"
-            app:met_baseColor="@color/colorPrimary"
+            app:met_baseColor="@color/bottomText"
             app:met_floatingLabel="highlight"
             app:met_primaryColor="@color/colorPrimary"
             />
@@ -52,35 +52,36 @@
             android:hint="Ingrese su nombre"
             android:inputType="text"
             android:text=""
-            android:textColor="@color/colorPrimary"
-            android:textColorHint="@color/colorPrimary"
+            android:textColor="@color/bottomText"
+            android:textColorHint="@color/bottomText"
             android:textSize="20sp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
 
             app:met_singleLineEllipsis="true"
-            app:met_baseColor="@color/colorPrimary"
+            app:met_baseColor="@color/bottomText"
             app:met_floatingLabel="highlight"
             app:met_primaryColor="@color/colorPrimary"
             />
 
         <com.rengwuxian.materialedittext.MaterialEditText
-            android:id="@+id/etxtTelefono"
-            android:hint="Telefono"
-            android:inputType="number"
+            android:id="@+id/etxtApellido"
+            android:hint="Ingrese su apellido"
+            android:inputType="text"
             android:text=""
-            android:textColor="@color/colorPrimary"
-            android:textColorHint="@color/colorPrimary"
+            android:textColor="@color/bottomText"
+            android:textColorHint="@color/bottomText"
             android:textSize="20sp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
 
             app:met_singleLineEllipsis="true"
-            app:met_baseColor="@color/colorPrimary"
+            app:met_baseColor="@color/bottomText"
             app:met_floatingLabel="highlight"
             app:met_primaryColor="@color/colorPrimary"
             />
-        
+
+
     </LinearLayout>
 
     

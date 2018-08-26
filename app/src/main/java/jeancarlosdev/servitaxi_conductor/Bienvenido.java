@@ -22,6 +22,7 @@ import android.view.animation.LinearInterpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.firebase.geofire.GeoFire;
@@ -81,7 +82,7 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
         com.google.android.gms.location.LocationListener
 {
     //region Atributos
-    Button logout;
+    ImageButton logout;
 
     private GoogleMap mMap;
 
@@ -612,7 +613,7 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
         super.onCreate(savedInstanceState);
         setContentView(R.layout.frm_bienvenido);
 
-        logout = (Button) findViewById(R.id.btn_find_user);
+        logout = (ImageButton) findViewById(R.id.btn_find_user);
 
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
