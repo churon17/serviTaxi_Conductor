@@ -3,6 +3,7 @@ package jeancarlosdev.servitaxi_conductor;
 import android.Manifest;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -66,6 +67,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.paperdb.Paper;
 import jeancarlosdev.servitaxi_conductor.Common.Common;
 import jeancarlosdev.servitaxi_conductor.Modelos.Token;
 import jeancarlosdev.servitaxi_conductor.Remote.IGoogleAPI;
@@ -79,6 +81,8 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
         com.google.android.gms.location.LocationListener
 {
     //region Atributos
+    Button logout;
+
     private GoogleMap mMap;
 
     private static final int PERMISSION_REQUEST_CODE = 7777;
@@ -279,6 +283,16 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
 
         mGoogleApiClient.connect();
 
+    }
+
+    private void singOut () {
+        Paper.init(this);
+        Paper.book().destroy();
+
+        FirebaseAuth.getInstance().signOut();
+        Intent intent = new Intent(Bienvenido.this, Login_1.class);
+        startActivity(intent);
+        finish();
     }
 
     private boolean checkPlayServices() {
@@ -597,6 +611,16 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.frm_bienvenido);
+
+        logout = (Button) findViewById(R.id.btn_find_user);
+
+        logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                singOut();
+            }
+        });
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);

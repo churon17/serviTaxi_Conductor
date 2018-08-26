@@ -22,6 +22,8 @@ public class Common {
 
     public static final String baseUrl = "https://maps.googleapis.com";
     public static final String fcmUrl = "https:/fcm.googleapis.com/";
+    public static String conductor = "usr";
+    public static String password = "pwd";
 
     public static IGoogleAPI getIGoogleAPI(){
 

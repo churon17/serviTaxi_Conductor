@@ -33,6 +33,7 @@ import com.rengwuxian.materialedittext.MaterialEditText;
 import java.util.HashMap;
 
 import dmax.dialog.SpotsDialog;
+import io.paperdb.Paper;
 import jeancarlosdev.servitaxi_conductor.Common.Common;
 import jeancarlosdev.servitaxi_conductor.Modelos.ClienteBackJson;
 import jeancarlosdev.servitaxi_conductor.Modelos.Conductor;
@@ -76,6 +77,9 @@ public class Login_1 extends AppCompatActivity {
                         setFontAttrId(R.attr.fontPath).build());
         setContentView(R.layout.frm_login_1);
 
+        //Iniciar PaperDB
+        Paper.init(this);
+
         auth = FirebaseAuth.getInstance();
 
         db = FirebaseDatabase.getInstance();
@@ -101,6 +105,69 @@ public class Login_1 extends AppCompatActivity {
                 mostrarVentanaLogin();
             }
         });
+
+
+        String user = Paper.book().read(Common.conductor);
+        String pass = Paper.book().read(Common.password);
+
+        if(user != null && pass != null){
+            if(!TextUtils.isEmpty(user) && !TextUtils.isEmpty(pass)){
+                autoLogin(user, pass);
+            }
+        }
+    }
+
+    private void autoLogin(String user, String pass) {
+
+                        final android.app.AlertDialog dialogoEspera = new SpotsDialog(Login_1.this);
+
+                        dialogoEspera.show();
+
+                        //IniciarSesion.
+
+                        auth.signInWithEmailAndPassword(user, pass)
+                                .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                                    @Override
+                                    public void onSuccess(AuthResult authResult) {
+                                        dialogoEspera.dismiss();
+
+                                        FirebaseDatabase.getInstance().getReference(Common.conductor_tb1)
+                                                .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                                                .addListenerForSingleValueEvent(new ValueEventListener() {
+                                                    @Override
+                                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                        Common.currentUser = dataSnapshot.getValue(Conductor.class);
+                                                        startActivity(new Intent(Login_1.this
+                                                                , Bienvenido.class));
+
+                                                        dialogoEspera.dismiss();
+
+                                                        finish();
+                                                    }
+
+                                                    @Override
+                                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                    }
+                                                });
+
+
+                                    }
+                                }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                dialogoEspera.dismiss();
+                                Snackbar.make(layoutPrincipal,
+                                        "Error" +e.getMessage(),
+                                        Snackbar.LENGTH_SHORT).show();
+
+                                btnSignIn.setEnabled(true);
+
+                            }
+                        });
+
+
+
     }
 
     private void mostrarVentanaLogin() {
@@ -188,6 +255,14 @@ public class Login_1 extends AppCompatActivity {
                                                 @Override
                                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                                     Common.currentUser = dataSnapshot.getValue(Conductor.class);
+                                                    Paper.book().write(Common.conductor, etxtEmailInicio.getText().toString());
+                                                    Paper.book().write(Common.password, etxtContrasenaInicio.getText().toString());
+
+                                                    startActivity(new Intent(Login_1.this
+                                                            , Bienvenido.class));
+
+                                                    finish();
+
                                                 }
 
                                                 @Override
@@ -196,10 +271,7 @@ public class Login_1 extends AppCompatActivity {
                                                 }
                                             });
 
-                                startActivity(new Intent(Login_1.this
-                                        , Bienvenido.class));
 
-                                finish();
                             }
                         }).addOnFailureListener(new OnFailureListener() {
                     @Override
