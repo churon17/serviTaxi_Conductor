@@ -10,7 +10,9 @@ import com.android.volley.Response;
 import java.util.HashMap;
 
 import jeancarlosdev.servitaxi_conductor.Modelos.ClienteBackJson;
+import jeancarlosdev.servitaxi_conductor.Modelos.Cooperativa;
 import jeancarlosdev.servitaxi_conductor.Modelos.MensajeBackJson;
+import jeancarlosdev.servitaxi_conductor.Modelos.MensajeCoopBackJson;
 
 public class Conexion {
 
@@ -21,7 +23,7 @@ public class Conexion {
                                                                 @NonNull Response.Listener<ClienteBackJson> response_Listener,
                                                                 @NonNull Response.ErrorListener errorListener){
 
-        final String url = API_URL + "cliente/iniciarSesion";
+        final String url = API_URL + "chofer/iniciarSesion";
 
         VolleyPeticion request = new VolleyPeticion(contexto,
                 Request.Method.POST, //Tipo de metodo.
@@ -37,12 +39,35 @@ public class Conexion {
         return request;
     }
 
-    public static VolleyPeticion<MensajeBackJson> registrarCliente(@NonNull final Context contexto,
+
+    public static VolleyPeticion<MensajeCoopBackJson> retornarCoopExternal(@NonNull final Context contexto,
+                                                                @NonNull final HashMap mapa,
+                                                                @NonNull Response.Listener<MensajeCoopBackJson> response_Listener,
+                                                                @NonNull Response.ErrorListener errorListener){
+
+        final String url = API_URL + "cooperativa/externalCooperativa";
+
+        VolleyPeticion request = new VolleyPeticion(contexto,
+                Request.Method.POST, //Tipo de metodo.
+                url,
+                mapa,
+                HashMap.class,
+                String.class,
+                response_Listener,
+                errorListener);
+
+        request.setResponseClass(MensajeCoopBackJson.class);
+
+        return request;
+    }
+
+
+    public static VolleyPeticion<MensajeBackJson> registrarChofer(@NonNull final Context contexto,
                                                                    @NonNull final HashMap mapa,
                                                                    @NonNull Response.Listener<MensajeBackJson> response_Listener,
                                                                    @NonNull Response.ErrorListener errorListener){
 
-        final String url = API_URL + "cliente/guardar";
+        final String url = API_URL + "chofer/guardar";
 
         VolleyPeticion request = new VolleyPeticion(contexto,
                 Request.Method.POST,
@@ -58,19 +83,11 @@ public class Conexion {
         return request;
     }
 
-
-
-
-    /*
-    public static VolleyPeticion<Noticia[]> listaNoticiasAdmin(
+    public static VolleyPeticion<Cooperativa[]> listaCooperativas(
             @NonNull final Context context,
-            @NonNull final String token,
-            @NonNull final String id,
-            @NonNull Response.Listener<Noticia[]> responseListener,
-            @NonNull Response.ErrorListener errorListener
-    ){
-
-        final String url = API_URL + "administracion/noticias/list/" +id;
+            @NonNull Response.Listener<Cooperativa[]> responseListener,
+            @NonNull Response.ErrorListener errorListener) {
+        final String url = API_URL + "cooperativa/listarCooperativa" ;
 
         VolleyPeticion request = new VolleyPeticion(
                 context,
@@ -79,21 +96,30 @@ public class Conexion {
                 responseListener,
                 errorListener
         );
-
-        request.setResponseClass(Noticia[].class);
-
-        try{
-
-            request.getHeaders().put("Api-Token", token);
-
-        }catch (Exception e){
-
-            Log.e("Error de listar", e.getMessage());
-        }
+        request.setResponseClass(Cooperativa[].class);
 
         return request;
-
     }
-*/
+
+    public static VolleyPeticion<MensajeBackJson> registrarUnidad(@NonNull final Context contexto,
+                                                                   @NonNull final HashMap mapa,
+                                                                   @NonNull Response.Listener<MensajeBackJson> response_Listener,
+                                                                   @NonNull Response.ErrorListener errorListener){
+
+        final String url = API_URL + "unidad/guardar";
+
+        VolleyPeticion request = new VolleyPeticion(contexto,
+                Request.Method.POST,
+                url,
+                mapa,
+                HashMap.class,
+                String.class,
+                response_Listener,
+                errorListener);
+
+        request.setResponseClass(MensajeBackJson.class);
+
+        return request;
+    }
 }
 

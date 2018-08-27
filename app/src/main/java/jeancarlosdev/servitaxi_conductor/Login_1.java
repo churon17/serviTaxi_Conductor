@@ -12,13 +12,17 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.AuthResult;
@@ -37,7 +41,9 @@ import io.paperdb.Paper;
 import jeancarlosdev.servitaxi_conductor.Common.Common;
 import jeancarlosdev.servitaxi_conductor.Modelos.ClienteBackJson;
 import jeancarlosdev.servitaxi_conductor.Modelos.Conductor;
+import jeancarlosdev.servitaxi_conductor.Modelos.Cooperativa;
 import jeancarlosdev.servitaxi_conductor.Modelos.MensajeBackJson;
+import jeancarlosdev.servitaxi_conductor.Modelos.MensajeCoopBackJson;
 import jeancarlosdev.servitaxi_conductor.Remote.Conexion;
 import jeancarlosdev.servitaxi_conductor.Remote.VolleyPeticion;
 import jeancarlosdev.servitaxi_conductor.Remote.VolleyProcesadorResultado;
@@ -59,10 +65,11 @@ public class Login_1 extends AppCompatActivity {
 
     private RequestQueue requestQueue;
 
-    boolean guardo = false;
+    private String[] listaCooperativas;
 
-    boolean inicioSesion = false;
+    HashMap<String, String> mapa;
 
+    String NombreCoop = "";
     @Override
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
@@ -70,6 +77,8 @@ public class Login_1 extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+
         super.onCreate(savedInstanceState);
         CalligraphyConfig.initDefault(new CalligraphyConfig.
                 Builder()
@@ -82,15 +91,19 @@ public class Login_1 extends AppCompatActivity {
 
         auth = FirebaseAuth.getInstance();
 
+        requestQueue = Volley.newRequestQueue(getApplicationContext());
+
+        consultaNoticias();
+
         db = FirebaseDatabase.getInstance();
 
         conductores = db.getReference(Common.conductor_tb1);
 
-        btnSignIn = (Button)findViewById(R.id.btnIniciar);
+        btnSignIn = (Button) findViewById(R.id.btnIniciar);
 
-        btnRegister = (Button)findViewById(R.id.btnRegistrar);
+        btnRegister = (Button) findViewById(R.id.btnRegistrar);
 
-        layoutPrincipal = (RelativeLayout)findViewById(R.id.layoutPrincipal);
+        layoutPrincipal = (RelativeLayout) findViewById(R.id.layoutPrincipal);
 
         btnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -110,8 +123,8 @@ public class Login_1 extends AppCompatActivity {
         String user = Paper.book().read(Common.conductor);
         String pass = Paper.book().read(Common.password);
 
-        if(user != null && pass != null){
-            if(!TextUtils.isEmpty(user) && !TextUtils.isEmpty(pass)){
+        if (user != null && pass != null) {
+            if (!TextUtils.isEmpty(user) && !TextUtils.isEmpty(pass)) {
                 autoLogin(user, pass);
             }
         }
@@ -119,53 +132,52 @@ public class Login_1 extends AppCompatActivity {
 
     private void autoLogin(String user, String pass) {
 
-                        final android.app.AlertDialog dialogoEspera = new SpotsDialog(Login_1.this);
+        final android.app.AlertDialog dialogoEspera = new SpotsDialog(Login_1.this);
 
-                        dialogoEspera.show();
+        dialogoEspera.show();
 
-                        //IniciarSesion.
+        //IniciarSesion.
 
-                        auth.signInWithEmailAndPassword(user, pass)
-                                .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+        auth.signInWithEmailAndPassword(user, pass)
+                .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                    @Override
+                    public void onSuccess(AuthResult authResult) {
+                        dialogoEspera.dismiss();
+
+                        FirebaseDatabase.getInstance().getReference(Common.conductor_tb1)
+                                .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                                .addListenerForSingleValueEvent(new ValueEventListener() {
                                     @Override
-                                    public void onSuccess(AuthResult authResult) {
+                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                        Common.currentUser = dataSnapshot.getValue(Conductor.class);
+                                        startActivity(new Intent(Login_1.this
+                                                , Bienvenido.class));
+
                                         dialogoEspera.dismiss();
 
-                                        FirebaseDatabase.getInstance().getReference(Common.conductor_tb1)
-                                                .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
-                                                .addListenerForSingleValueEvent(new ValueEventListener() {
-                                                    @Override
-                                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                                        Common.currentUser = dataSnapshot.getValue(Conductor.class);
-                                                        startActivity(new Intent(Login_1.this
-                                                                , Bienvenido.class));
+                                        finish();
+                                    }
 
-                                                        dialogoEspera.dismiss();
-
-                                                        finish();
-                                                    }
-
-                                                    @Override
-                                                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                                    }
-                                                });
-
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError databaseError) {
 
                                     }
-                                }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                dialogoEspera.dismiss();
-                                Snackbar.make(layoutPrincipal,
-                                        "Error" +e.getMessage(),
-                                        Snackbar.LENGTH_SHORT).show();
+                                });
 
-                                btnSignIn.setEnabled(true);
 
-                            }
-                        });
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                dialogoEspera.dismiss();
+                Snackbar.make(layoutPrincipal,
+                        "Error" + e.getMessage(),
+                        Snackbar.LENGTH_SHORT).show();
 
+                btnSignIn.setEnabled(true);
+
+            }
+        });
 
 
     }
@@ -193,101 +205,101 @@ public class Login_1 extends AppCompatActivity {
 
         dialogInicio.setPositiveButton("INICIAR SESION",
                 new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-
-                dialogInterface.dismiss();
-
-                btnSignIn.setEnabled(false);
-
-                /*Desactivo el boton de inicio de Sesion
-                * para que el usuario no este manipulando*/
-
-                if(TextUtils.isEmpty(etxtEmailInicio.getText().toString())){
-
-                    Snackbar.make(layoutPrincipal,
-                            "Por favor ingrese una direccion de correo " +
-                                    "electronico",
-                            Snackbar.LENGTH_SHORT).show();
-
-                    return;
-                }
-
-                if(TextUtils.isEmpty(etxtContrasenaInicio.getText().toString())){
-
-                    Snackbar.make(layoutPrincipal,
-                            "Por favor ingrese contrasena"
-                            , Snackbar.LENGTH_SHORT).show();
-
-                    return;
-                }
-
-                if(etxtContrasenaInicio.getText().toString().length() < 6){
-
-                    Snackbar.make(layoutPrincipal,
-                            "Contrasena demasiado corta ",
-                            Snackbar.LENGTH_SHORT).show();
-
-                    return;
-                }
-                final android.app.AlertDialog dialogoEspera = new SpotsDialog(Login_1.this);
-
-                dialogoEspera.show();
-
-                HashMap<String, String> mapa = new HashMap<>();
-
-                mapa.put("correo", etxtEmailInicio.getText().toString());
-
-                mapa.put("clave", etxtContrasenaInicio.getText().toString());
-
-                //IniciarSesion.
-
-                auth.signInWithEmailAndPassword(etxtEmailInicio.getText().toString(),
-                        etxtContrasenaInicio.getText().toString())
-                        .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
-                            @Override
-                            public void onSuccess(AuthResult authResult) {
-                                dialogoEspera.dismiss();
-
-                                FirebaseDatabase.getInstance().getReference(Common.conductor_tb1)
-                                            .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
-                                            .addListenerForSingleValueEvent(new ValueEventListener() {
-                                                @Override
-                                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                                    Common.currentUser = dataSnapshot.getValue(Conductor.class);
-                                                    Paper.book().write(Common.conductor, etxtEmailInicio.getText().toString());
-                                                    Paper.book().write(Common.password, etxtContrasenaInicio.getText().toString());
-
-                                                    startActivity(new Intent(Login_1.this
-                                                            , Bienvenido.class));
-
-                                                    finish();
-
-                                                }
-
-                                                @Override
-                                                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                                }
-                                            });
-
-
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
                     @Override
-                    public void onFailure(@NonNull Exception e) {
-                        dialogoEspera.dismiss();
-                        Snackbar.make(layoutPrincipal,
-                                "Error" +e.getMessage(),
-                                Snackbar.LENGTH_SHORT).show();
+                    public void onClick(DialogInterface dialogInterface, int i) {
 
-                        btnSignIn.setEnabled(true);
+                        dialogInterface.dismiss();
 
-                        btnSignIn.setEnabled(true);
+                        btnSignIn.setEnabled(false);
+
+                        /*Desactivo el boton de inicio de Sesion
+                         * para que el usuario no este manipulando*/
+
+                        if (TextUtils.isEmpty(etxtEmailInicio.getText().toString())) {
+
+                            Snackbar.make(layoutPrincipal,
+                                    "Por favor ingrese una direccion de correo " +
+                                            "electronico",
+                                    Snackbar.LENGTH_SHORT).show();
+
+                            return;
+                        }
+
+                        if (TextUtils.isEmpty(etxtContrasenaInicio.getText().toString())) {
+
+                            Snackbar.make(layoutPrincipal,
+                                    "Por favor ingrese contrasena"
+                                    , Snackbar.LENGTH_SHORT).show();
+
+                            return;
+                        }
+
+                        if (etxtContrasenaInicio.getText().toString().length() < 6) {
+
+                            Snackbar.make(layoutPrincipal,
+                                    "Contrasena demasiado corta ",
+                                    Snackbar.LENGTH_SHORT).show();
+
+                            return;
+                        }
+                        final android.app.AlertDialog dialogoEspera = new SpotsDialog(Login_1.this);
+
+                        dialogoEspera.show();
+
+                        HashMap<String, String> mapa = new HashMap<>();
+
+                        mapa.put("correo", etxtEmailInicio.getText().toString());
+
+                        mapa.put("clave", etxtContrasenaInicio.getText().toString());
+
+                        //IniciarSesion.
+
+                        auth.signInWithEmailAndPassword(etxtEmailInicio.getText().toString(),
+                                etxtContrasenaInicio.getText().toString())
+                                .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                                    @Override
+                                    public void onSuccess(AuthResult authResult) {
+                                        dialogoEspera.dismiss();
+
+                                        FirebaseDatabase.getInstance().getReference(Common.conductor_tb1)
+                                                .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                                                .addListenerForSingleValueEvent(new ValueEventListener() {
+                                                    @Override
+                                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                        Common.currentUser = dataSnapshot.getValue(Conductor.class);
+                                                        Paper.book().write(Common.conductor, etxtEmailInicio.getText().toString());
+                                                        Paper.book().write(Common.password, etxtContrasenaInicio.getText().toString());
+
+                                                        startActivity(new Intent(Login_1.this
+                                                                , Bienvenido.class));
+
+                                                        finish();
+
+                                                    }
+
+                                                    @Override
+                                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                    }
+                                                });
+
+
+                                    }
+                                }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                dialogoEspera.dismiss();
+                                Snackbar.make(layoutPrincipal,
+                                        "Error" + e.getMessage(),
+                                        Snackbar.LENGTH_SHORT).show();
+
+                                btnSignIn.setEnabled(true);
+
+                                btnSignIn.setEnabled(true);
+                            }
+                        });
                     }
                 });
-            }
-        });
 
 
         dialogInicio.setNegativeButton("CANCELAR", new DialogInterface.OnClickListener() {
@@ -301,8 +313,16 @@ public class Login_1 extends AppCompatActivity {
 
     }
 
+    private String retornarNombreCoop(String nombre){
+
+        NombreCoop = nombre;
+
+        return NombreCoop;
+    }
+
     private void mostrarVentanaRegistro() {
-        AlertDialog.Builder dialog=  new AlertDialog.Builder(this);
+
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
         dialog.setTitle("Registrar Conductor");
         dialog.setMessage("Registro de Conductor ServiTaxi");
 
@@ -323,15 +343,44 @@ public class Login_1 extends AppCompatActivity {
         final MaterialEditText etxtNombre = register_Layout.findViewById(
                 R.id.etxtNombre);
 
+        final MaterialEditText etxtPlaca = register_Layout.findViewById(
+                R.id.etxtPlaca);
+
+        Spinner spinnerCooperativa = register_Layout.findViewById(R.id.spinnerCooperativa);
+
+        if (listaCooperativas.length > 0) {
+
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>
+                    (register_Layout.getContext(), android.R.layout.simple_spinner_item, listaCooperativas);
+
+
+            adapter.setDropDownViewResource(android.R.layout.simple_list_item_1);
+
+            spinnerCooperativa.setAdapter(adapter);
+
+        }
+
+        spinnerCooperativa.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+
+                final String  cooperativaEscogida =  parent.getItemAtPosition(pos).toString() ;
+
+                retornarNombreCoop(cooperativaEscogida);
+            }
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+
+
+
         dialog.setView(register_Layout);
 
         dialog.setPositiveButton("REGISTRAR", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
 
-
                 dialogInterface.dismiss();
-                if(TextUtils.isEmpty(etxtEmail.getText().toString())){
+                if (TextUtils.isEmpty(etxtEmail.getText().toString())) {
 
                     Snackbar.make(layoutPrincipal,
                             "Por favor ingrese una direccion de correo " +
@@ -341,7 +390,7 @@ public class Login_1 extends AppCompatActivity {
                     return;
                 }
 
-                if(TextUtils.isEmpty(etxtContrasena.getText().toString())){
+                if (TextUtils.isEmpty(etxtContrasena.getText().toString())) {
 
                     Snackbar.make(layoutPrincipal,
                             "Por favor ingrese contrasena"
@@ -351,7 +400,7 @@ public class Login_1 extends AppCompatActivity {
                 }
 
 
-                if(etxtContrasena.getText().toString().length() < 6){
+                if (etxtContrasena.getText().toString().length() < 6) {
 
                     Snackbar.make(layoutPrincipal,
                             "Por favor ingrese una contrasena con mas de " +
@@ -361,7 +410,7 @@ public class Login_1 extends AppCompatActivity {
                     return;
                 }
 
-                if(TextUtils.isEmpty(etxtNombre.getText().toString())){
+                if (TextUtils.isEmpty(etxtNombre.getText().toString())) {
 
                     Snackbar.make(layoutPrincipal,
                             "Por favor ingrese su Nombre ",
@@ -371,68 +420,244 @@ public class Login_1 extends AppCompatActivity {
                 }
 
 
-                if(TextUtils.isEmpty(etxtApellido.getText().toString())){
+                if (TextUtils.isEmpty(etxtApellido.getText().toString())) {
 
                     Snackbar.make(layoutPrincipal,
-                            "Por favor ingrese su telefono de celular ",
+                            "Por favor ingrese su Apellido",
                             Snackbar.LENGTH_SHORT).show();
 
                     return;
                 }
 
-                Toast.makeText(getApplicationContext(),
-                        "Se ha guardado correctamente",
-                        Toast.LENGTH_SHORT).show();
+                if (TextUtils.isEmpty(etxtPlaca.getText().toString())) {
 
-                auth.createUserWithEmailAndPassword(
-                        etxtEmail.getText().toString(),
-                        etxtContrasena.getText().toString()
-                )
-                        .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                    Snackbar.make(layoutPrincipal,
+                            "Por favor ingrese su Placa del Vehiculo",
+                            Snackbar.LENGTH_SHORT).show();
+
+                    return;
+                }
+
+                mapa = new HashMap<>();
+
+                mapa.put("correo", etxtEmail.getText().toString());
+
+                mapa.put("clave", etxtContrasena.getText().toString());
+
+                mapa.put("nombre", etxtNombre.getText().toString());
+
+                mapa.put("apellido", etxtApellido.getText().toString());
+
+                //region RegistrarCliente y Unidad.
+
+                VolleyPeticion<MensajeBackJson> registrar = Conexion.registrarChofer(
+                        getApplicationContext(),
+                        mapa,
+                        new Response.Listener<MensajeBackJson>() {
                             @Override
-                            public void onSuccess(AuthResult authResult) {
-                                //Guardar Usuario en la base de datos.
+                            public void onResponse(MensajeBackJson response) {
 
-                                Conductor conductor = new Conductor();
+                                if (response != null && ("FD".equalsIgnoreCase(response.siglas) || "DNF".equalsIgnoreCase(response.siglas))) {
 
-                                conductor.setEmail(etxtEmail.getText().toString());
-                                conductor.setPassword(etxtContrasena.getText().toString());
-                                conductor.setNombre(etxtNombre.getText().toString());
-                                conductor.setApellido(etxtApellido.getText().toString());
+                                    Toast.makeText(layoutPrincipal.getContext(), response.mensaje, Toast.LENGTH_SHORT).show();
 
-                                //Usamos al email como llave primaria.
-                                conductores.child(FirebaseAuth.getInstance().getCurrentUser().getUid())
-                                .setValue(conductor)
-                                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                    @Override
-                                    public void onSuccess(Void aVoid) {
+                                    return;
 
-                                        Snackbar.make(layoutPrincipal,
-                                                "Conductor Registrado correctamente",
-                                                Snackbar.LENGTH_SHORT ).show();
+                                } else {
+
+                                    mapa = new HashMap<>();
+
+                                    mapa.put("correo", etxtEmail.getText().toString());
+
+                                    mapa.put("clave", etxtContrasena.getText().toString());
 
 
-                                    }
-                                })
-                                .addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
+                                    VolleyPeticion<ClienteBackJson> inicio = Conexion.iniciarSesion(
+                                            getApplicationContext(),
+                                            mapa,
+                                            new Response.Listener<ClienteBackJson>() {
+                                                @Override
+                                                public void onResponse(final ClienteBackJson responseCliente) {
 
-                                        Snackbar.make(layoutPrincipal,
-                                                "Conductor no registrado " + e.getMessage(),
-                                                Snackbar.LENGTH_SHORT ).show();
+                                                    if (responseCliente != null
+                                                            && responseCliente.siglas.equalsIgnoreCase("ND")) {
 
-                                    }
-                                });
+                                                        Toast.makeText(Login_1.this, responseCliente.mensaje, Toast.LENGTH_SHORT).show();
+
+                                                        return;
+
+                                                    } else {
+
+                                                        mapa = new HashMap<>();
+
+                                                        mapa.put("nombre", NombreCoop);
+
+                                                        VolleyPeticion<MensajeCoopBackJson> inicio = Conexion.retornarCoopExternal(
+                                                                getApplicationContext(),
+                                                                mapa,
+                                                                new Response.Listener<MensajeCoopBackJson>() {
+                                                                    @Override
+                                                                    public void onResponse(MensajeCoopBackJson responseUnidad) {
+
+                                                                        if (responseUnidad != null
+                                                                                && responseUnidad.siglas.equalsIgnoreCase("ND")) {
+
+                                                                            Toast.makeText(Login_1.this, responseUnidad.mensaje, Toast.LENGTH_SHORT).show();
+
+                                                                            return;
+
+                                                                        } else {
+
+
+                                                                            mapa = new HashMap<>();
+
+                                                                            mapa.put("llaveChofer", responseCliente.external);
+
+                                                                            mapa.put("llaveCoop", responseUnidad.external);
+
+                                                                            mapa.put("placa", etxtPlaca.getText().toString());
+
+
+                                                                            VolleyPeticion<MensajeBackJson> registrar = Conexion.registrarUnidad(
+                                                                                    getApplicationContext(),
+                                                                                    mapa,
+                                                                                    new Response.Listener<MensajeBackJson>() {
+                                                                                        @Override
+                                                                                        public void onResponse(MensajeBackJson response) {
+                                                                                            if (response != null && response.siglas.equalsIgnoreCase("FD")) {
+
+                                                                                                Toast.makeText(Login_1.this, response.mensaje, Toast.LENGTH_SHORT).show();
+
+                                                                                                return;
+
+                                                                                            } else {
+
+                                                                                                auth.createUserWithEmailAndPassword(
+                                                                                                        etxtEmail.getText().toString(),
+                                                                                                        etxtContrasena.getText().toString()
+                                                                                                )
+                                                                                                        .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                                                                                                            @Override
+                                                                                                            public void onSuccess(AuthResult authResult) {
+                                                                                                                //Guardar Usuario en la base de datos.
+
+                                                                                                                Conductor conductor = new Conductor();
+
+                                                                                                                conductor.setEmail(etxtEmail.getText().toString());
+                                                                                                                conductor.setPassword(etxtContrasena.getText().toString());
+                                                                                                                conductor.setNombre(etxtNombre.getText().toString());
+                                                                                                                conductor.setApellido(etxtApellido.getText().toString());
+
+                                                                                                                //Usamos al email como llave primaria.
+                                                                                                                conductores.child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                                                                                                                        .setValue(conductor)
+                                                                                                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                                                                                            @Override
+                                                                                                                            public void onSuccess(Void aVoid) {
+
+                                                                                                                                Snackbar.make(layoutPrincipal,
+                                                                                                                                        "Conductor Registrado correctamente",
+                                                                                                                                        Snackbar.LENGTH_SHORT).show();
+
+
+                                                                                                                            }
+                                                                                                                        })
+                                                                                                                        .addOnFailureListener(new OnFailureListener() {
+                                                                                                                            @Override
+                                                                                                                            public void onFailure(@NonNull Exception e) {
+
+                                                                                                                                Snackbar.make(layoutPrincipal,
+                                                                                                                                        "Conductor no registrado " + e.getMessage(),
+                                                                                                                                        Snackbar.LENGTH_SHORT).show();
+
+                                                                                                                            }
+                                                                                                                        });
+                                                                                                            }
+                                                                                                        }).addOnFailureListener(new OnFailureListener() {
+                                                                                                    @Override
+                                                                                                    public void onFailure(@NonNull Exception e) {
+                                                                                                        Snackbar.make(layoutPrincipal,
+                                                                                                                "Conductor no registrado" + e.getMessage(),
+                                                                                                                Snackbar.LENGTH_SHORT).show();
+                                                                                                    }
+                                                                                                });
+
+                                                                                            }
+                                                                                        }
+                                                                                    },
+                                                                                    new Response.ErrorListener() {
+                                                                                        @Override
+                                                                                        public void onErrorResponse(VolleyError error) {
+
+                                                                                            VolleyTiposError errors = VolleyProcesadorResultado.parseErrorResponse(error);
+
+                                                                                            Log.e("Error", error.toString());
+
+                                                                                            return;
+                                                                                        }
+                                                                                    }
+                                                                            );
+
+                                                                            requestQueue.add(registrar);
+
+
+                                                                        }
+                                                                    }
+                                                                },
+                                                                new Response.ErrorListener() {
+                                                                    @Override
+                                                                    public void onErrorResponse(VolleyError error) {
+
+                                                                        VolleyTiposError errors = VolleyProcesadorResultado.parseErrorResponse(error);
+
+                                                                        Toast.makeText(Login_1.this, error.toString(), Toast.LENGTH_SHORT).show();
+
+                                                                        return;
+                                                                    }
+                                                                }
+                                                        );
+
+                                                        requestQueue.add(inicio);
+
+
+
+
+                                                    }
+                                                }
+                                            },
+                                            new Response.ErrorListener() {
+                                                @Override
+                                                public void onErrorResponse(VolleyError error) {
+
+                                                    VolleyTiposError errors = VolleyProcesadorResultado.parseErrorResponse(error);
+
+                                                    Toast.makeText(Login_1.this, error.toString(), Toast.LENGTH_SHORT).show();
+
+                                                    return;
+                                                }
+                                            }
+                                    );
+
+                                    requestQueue.add(inicio);
+                                }
                             }
-                        }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Snackbar.make(layoutPrincipal,
-                                "Conductor no registrado" + e.getMessage(),
-                                Snackbar.LENGTH_SHORT ).show();
-                    }
-                });
+                        },
+                        new Response.ErrorListener() {
+
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+
+                                VolleyTiposError errors = VolleyProcesadorResultado.parseErrorResponse(error);
+
+                                Log.e("Error", error.toString());
+
+                                return;
+                            }
+                        }
+                );
+
+                requestQueue.add(registrar);
+                //endregion
             }
         });
 
@@ -447,33 +672,19 @@ public class Login_1 extends AppCompatActivity {
         dialog.show();
     }
 
-    private boolean registrarCliente(
-            @NonNull HashMap<String, String> map){
+    private void consultaNoticias() {
 
-        VolleyPeticion<MensajeBackJson> registrar = Conexion.registrarCliente(
+        VolleyPeticion<Cooperativa[]> listaNoticias = Conexion.listaCooperativas(
                 getApplicationContext(),
-                map,
-                new Response.Listener<MensajeBackJson>() {
+                new Response.Listener<Cooperativa[]>() {
                     @Override
-                    public void onResponse(MensajeBackJson response) {
-                        if(response != null  && response.siglas.equalsIgnoreCase("FD")){
+                    public void onResponse(Cooperativa[] response) {
 
-                            Snackbar.make(layoutPrincipal,
-                                    "Error " + response.mensaje,
-                                    Snackbar.LENGTH_SHORT
-                            ).show();
+                        listaCooperativas = new String[response.length];
 
-                            btnSignIn.setEnabled(true);
+                        for (int i = 0; i < response.length; i++) {
 
-                            guardo = true;
-
-                            return;
-
-                        }else{
-
-                            Snackbar.make(layoutPrincipal,
-                                    "Correcto, " +response.mensaje,
-                                    Snackbar.LENGTH_SHORT).show();
+                            listaCooperativas[i] = response[i].nombre;
 
                         }
                     }
@@ -482,74 +693,16 @@ public class Login_1 extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error) {
 
-                        VolleyTiposError errors = VolleyProcesadorResultado.parseErrorResponse(error);
-
-                        Log.e("Error", error.toString());
-
                         Snackbar.make(layoutPrincipal,
-                                errors.errorMessage,
-                                Snackbar.LENGTH_SHORT).show();
+                                error.getMessage(),
+                                Snackbar.LENGTH_SHORT
+                        ).show();
 
-                        return;
                     }
                 }
         );
-
-        requestQueue.add(registrar);
-        return guardo;
+        requestQueue.add(listaNoticias);
     }
 
-    private boolean iniciarSesionCliente(
-            @NonNull HashMap<String, String> map){
 
-        VolleyPeticion<ClienteBackJson> inicio = Conexion.iniciarSesion(
-                getApplicationContext(),
-                map,
-                new Response.Listener<ClienteBackJson>() {
-                    @Override
-                    public void onResponse(ClienteBackJson response) {
-
-                        if(response != null
-                                && response.siglas.equalsIgnoreCase("ND")){
-
-                            Snackbar.make(layoutPrincipal,
-                                    "Error " + response.mensaje,
-                                    Snackbar.LENGTH_SHORT
-                            ).show();
-
-                            btnSignIn.setEnabled(true);
-
-                            return;
-
-                        }else {
-
-                            Snackbar.make(layoutPrincipal,
-                                    "Bienvenido, " + response.nombre,
-                                    Snackbar.LENGTH_SHORT).show();
-
-                            inicioSesion = true;
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-
-                        VolleyTiposError errors = VolleyProcesadorResultado.parseErrorResponse(error);
-
-                        Log.e("Error", error.toString());
-
-                        Snackbar.make(layoutPrincipal,
-                                errors.errorMessage,
-                                Snackbar.LENGTH_SHORT).show();
-
-                        return;
-                    }
-                }
-        );
-
-        requestQueue.add(inicio);
-
-        return  inicioSesion;
-    }
 }

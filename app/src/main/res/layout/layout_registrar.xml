@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     app:cardElevation="10dp"
     >
-    
+
     <LinearLayout
         android:orientation="vertical"
         android:layout_margin="20dp"
@@ -81,6 +81,44 @@
             app:met_primaryColor="@color/colorPrimary"
             />
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="10"
+            >
+            <TextView
+                android:layout_weight="3"
+                android:layout_height="wrap_content"
+                android:text="Cooperativa"
+                android:layout_width="0dp"
+                android:textStyle="bold"
+                />
+
+            <Spinner
+                android:id="@+id/spinnerCooperativa"
+                android:layout_weight="6"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+
+        <com.rengwuxian.materialedittext.MaterialEditText
+            android:id="@+id/etxtPlaca"
+            android:hint="Ingrese placa de su vehiculo"
+            android:inputType="text"
+            android:text=""
+            android:textColor="@color/bottomText"
+            android:textColorHint="@color/bottomText"
+            android:textSize="20sp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+            app:met_singleLineEllipsis="true"
+            app:met_baseColor="@color/bottomText"
+            app:met_floatingLabel="highlight"
+            app:met_primaryColor="@color/colorPrimary"
+            />
 
     </LinearLayout>
 
