@@ -70,6 +70,7 @@ import java.util.List;
 
 import io.paperdb.Paper;
 import jeancarlosdev.servitaxi_conductor.Common.Common;
+import jeancarlosdev.servitaxi_conductor.Modelos.Cooperativa;
 import jeancarlosdev.servitaxi_conductor.Modelos.Token;
 import jeancarlosdev.servitaxi_conductor.Remote.IGoogleAPI;
 import retrofit2.Call;
@@ -112,12 +113,6 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
 
     private IGoogleAPI mService;
 
-    boolean isDriverFound = false;
-
-    String driverId = "";
-
-    int radius = 1; // 1km
-
     //region Animacion del Carro Atributos.
     private List<LatLng> polyLineList;
 
@@ -132,7 +127,6 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
     private LatLng startPosition, endPosition, currentPosition;
 
     private int index, next;
-
 
     private PlaceAutocompleteFragment places;
 
@@ -349,21 +343,12 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
 
             return;
         }
-
-       Common.mUltimaUbicacion = LocationServices.
-              FusedLocationApi.
-            getLastLocation(mGoogleApiClient);
-
-      //  Location location = new Location("");
-
-        //location.setLatitude(-4.02695490724033);
-
-        //location.setLongitude(-79.20271825947566);
-
-        //Common.mUltimaUbicacion = location;
-
+            Common.mUltimaUbicacion = LocationServices.
+                    FusedLocationApi.
+                    getLastLocation(mGoogleApiClient);
 
         if(Common.mUltimaUbicacion != null){
+
             if(location_switch.isChecked()){
 
                 final double latitude = Common.mUltimaUbicacion.getLatitude();
@@ -601,11 +586,6 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
 
 
     }
-
-
-
-
-
     //endregion
 
     @Override
@@ -632,7 +612,6 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
         onlineRef = FirebaseDatabase.getInstance().getReference().child(".info/connected");
 
         currentUserRef = FirebaseDatabase.getInstance().getReference(Common.drivers_tb1).child(FirebaseAuth.getInstance().getCurrentUser().getUid());
-
 
         onlineRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -844,7 +823,15 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
 
     @Override
     public void onLocationChanged(Location location) {
+
+        Log.e("Cambio de ubicacion", "Yes");
+
         Common.mUltimaUbicacion = location;
+
+        Log.e("Latitudddddd", Common.mUltimaUbicacion.getLatitude() + "");
+
+        Log.e("Longitudddddd", Common.mUltimaUbicacion.getLongitude() + "");
+
         displayLocation();
     }
 }

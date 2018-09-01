@@ -36,7 +36,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/colorPrimary"
-            android:text="ServiTaxi"
+            android:text="@string/tituloMod"
             android:textStyle="bold"
             android:textSize="30dp"
             android:layout_gravity="center"/>
@@ -54,27 +54,7 @@
             android:scaleType="centerInside"
             android:padding="10dp"/>
 
-
-        <!--
-        <Button
-            android:id="@+id/btn_find_user"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:layout_margin="4dp"
-            android:layout_weight="10"
-            android:background="@drawable/btn_logout"
-            android:text="Cerrar Sesión"
-            android:textAlignment="center"
-            android:textColor="@android:color/white" />
-        -->
-
     </android.support.v7.widget.CardView>
-
-
-
-
-
 
     <fragment
 
@@ -83,8 +63,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".Bienvenido" />
-
-
 
     <android.support.v7.widget.CardView
             app:cardElevation="18dp"

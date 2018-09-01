@@ -119,8 +119,8 @@ public class Login_1 extends AppCompatActivity {
             }
         });
 
-
         String user = Paper.book().read(Common.conductor);
+
         String pass = Paper.book().read(Common.password);
 
         if (user != null && pass != null) {

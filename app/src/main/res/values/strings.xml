@@ -8,4 +8,18 @@
     -->
     <string name="google_direction_api">AIzaSyCi0nLNKFHrboKpobMFXvNfnOyST64tXWM</string>
     <string name="title_activity_rastreo_conductor">Map</string>
+    <string name="tituloApp">S E R V I T A X I</string>
+    <string name="tituloMod">ServiTaxi</string>
+    <string name="btnAceptar">ACEPTAR</string>
+    <string name="btnRechazar">RECHAZAR</string>
+    <string name="txtConductor">Conductor</string>
+    <string name="btnIniciarSesion">INICIAR SESION</string>
+    <string name="btnRegistrar">REGISTRAR</string>
+    <string name="txtIngreseCorreo">Ingrese su correo</string>
+    <string name="etxtIngresePass">Ingrese su contraseña</string>
+    <string name="etxtIngreseCorreo">Ingrese su correo</string>
+    <string name="etxtIngreseNombre">Ingrese su nombre</string>
+    <string name="etxtIngreseApellido">Ingrese su apellido</string>
+    <string name="etxtCoop">Cooperativa</string>
+    <string name="etxtIngresePlaca">Ingrese placa de su vehiculo</string>
 </resources>

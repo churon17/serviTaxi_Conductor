@@ -15,7 +15,7 @@
 
         <com.rengwuxian.materialedittext.MaterialEditText
             android:id="@+id/etxtEmail"
-            android:hint="Ingrese su correo"
+            android:hint="@string/txtIngreseCorreo"
             android:inputType="textEmailAddress"
             android:textColor="@color/colorPrimary"
             android:textColorHint="@color/colorPrimary"
@@ -31,7 +31,7 @@
 
         <com.rengwuxian.materialedittext.MaterialEditText
             android:id="@+id/etxtContrasena"
-            android:hint="Ingrese su contrasena"
+            android:hint="@string/etxtIngresePass"
             android:inputType="textPassword"
             android:textColor="@color/colorPrimary"
             android:textColorHint="@color/colorPrimary"
