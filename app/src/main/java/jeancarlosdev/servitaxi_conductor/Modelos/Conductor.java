@@ -61,33 +61,57 @@ public class Conductor {
     }
 
     /**
-     * Cambia el atributo de la clase Conductor, recibe como parametro un String
+     * Cambia el atributo email de la clase Conductor, recibe como parametro un String
      * @param email este parametro va a remplazar el atributo de la clase.
      */
     public void setEmail(String email) {
         this.email = email;
     }
 
+    /**
+     *
+     * @return Obtiene el atributo nombre, de la clase conductor.
+     */
     public String getNombre() {
         return nombre;
     }
 
+    /**
+     * Cambia el atributo nombre de la clase Conductor, recibe como parametro un String
+     * @param nombre este parametro va a remplazar el atributo de la clase.
+     */
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
 
+    /**
+     *
+     * @return Obtiene el atributo password(Contraseña), de la clase conductor.
+     */
     public String getPassword() {
         return password;
     }
 
+    /**
+     * Cambia el atributo password(Contraseña) de la clase Conductor, recibe como parametro un String
+     * @param password este parametro va a remplazar el atributo de la clase.
+     */
     public void setPassword(String password) {
         this.password = password;
     }
 
+    /**
+     *
+     * @return Obtiene el atributo apellido, de la clase conductor.
+     */
     public String getApellido() {
         return apellido;
     }
 
+    /**
+     * Cambia el atributo  apellido de la clase Conductor, recibe como parametro un String
+     * @param apellido este parametro va a remplazar el atributo de la clase.
+     */
     public void setApellido(String apellido) {
         this.apellido = apellido;
     }

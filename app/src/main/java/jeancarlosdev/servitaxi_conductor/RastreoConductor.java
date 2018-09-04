@@ -55,6 +55,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import jeancarlosdev.servitaxi_conductor.Common.Common;
 import jeancarlosdev.servitaxi_conductor.Helper.DirectionJSONParser;
@@ -71,8 +73,7 @@ import retrofit2.Response;
 public class RastreoConductor extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.OnConnectionFailedListener,
         GoogleApiClient.ConnectionCallbacks,
-        LocationListener
-    {
+        LocationListener {
 
     private GoogleMap mMap;
 
@@ -116,7 +117,7 @@ public class RastreoConductor extends FragmentActivity implements OnMapReadyCall
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        if(getIntent() != null){
+        if (getIntent() != null) {
 
             riderLat = getIntent().getDoubleExtra("lat", -1.0);
             riderLng = getIntent().getDoubleExtra("lng", -1.0);
@@ -135,11 +136,11 @@ public class RastreoConductor extends FragmentActivity implements OnMapReadyCall
         mMap = googleMap;
 
         riderMarker = mMap.addCircle(new CircleOptions()
-        .center(new LatLng(riderLat, riderLng))
-        .radius(50) // 50m de radio
-        .strokeColor(Color.BLUE)
-        .fillColor(0x220000FF)
-        .strokeWidth(5.0f));
+                .center(new LatLng(riderLat, riderLng))
+                .radius(50) // 50m de radio
+                .strokeColor(Color.BLUE)
+                .fillColor(0x220000FF)
+                .strokeWidth(5.0f));
 
         geoFire = new GeoFire(FirebaseDatabase.getInstance().getReference(Common.drivers_tb1));
         GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(riderLat, riderLng), 0.05f);
@@ -171,127 +172,144 @@ public class RastreoConductor extends FragmentActivity implements OnMapReadyCall
         });
     }
 
-        private void sendArriveNotification(String customerId) {
-            Token token = new Token(customerId);
-            Notification notification = new Notification("Llegada", String.format("El conductor %s ha llegado", Common.currentUser.getNombre()));
+    private void sendArriveNotification(String customerId) {
+        Token token = new Token(customerId);
+        Notification notification = new Notification("Llegada", String.format("El conductor %s ha llegado", Common.currentUser.getNombre()));
 
-            Sender sender = new Sender(token.getToken(), notification);
+        Sender sender = new Sender(token.getToken(), notification);
 
-            mFCMService.sendMessage(sender).enqueue(new Callback<FCMResponse>() {
-                @Override
-                public void onResponse(Call<FCMResponse> call, Response<FCMResponse> response) {
-                    if (response.body().success != 1){
-                        Toast.makeText(RastreoConductor.this, "Fallo", Toast.LENGTH_SHORT).show();
-                    }
+        mFCMService.sendMessage(sender).enqueue(new Callback<FCMResponse>() {
+            @Override
+            public void onResponse(Call<FCMResponse> call, Response<FCMResponse> response) {
+                if (response.body().success != 1) {
+                    Toast.makeText(RastreoConductor.this, "Fallo", Toast.LENGTH_SHORT).show();
                 }
-
-                @Override
-                public void onFailure(Call<FCMResponse> call, Throwable t) {
-
-                }
-            });
-
-        }
-
-        @Override
-        public void onConnected(@Nullable Bundle bundle) {
-            displayLocation();
-            startLocationUpdates();
-        }
-
-        @Override
-        public void onConnectionSuspended(int i) {
-            mGoogleApiClient.connect();
-        }
-
-        @Override
-        public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
-        }
-
-        @Override
-        public void onLocationChanged(Location location) {
-            Common.mUltimaUbicacion = location;
-            displayLocation();
-        }
-
-        private void startLocationUpdates() {
-
-            if(ActivityCompat.checkSelfPermission(this,
-                    android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager
-                    .PERMISSION_GRANTED
-                    && ActivityCompat.checkSelfPermission(this,
-                    Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager
-                    .PERMISSION_GRANTED)
-            {
-
-                return;
             }
 
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,
-                    mLocationRequest,this
-            );
+            @Override
+            public void onFailure(Call<FCMResponse> call, Throwable t) {
 
+            }
+        });
+
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        startLocationUpdates();
+        final Handler handler = new Handler();
+        Timer timer = new Timer();
+
+        TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    public void run() {
+                        try {
+
+                            displayLocation();
+
+                        } catch (Exception e) {
+                            Log.e("error", e.getMessage());
+                        }
+                    }
+                });
+            }
+        };
+
+        timer.schedule(task, 0, 3000);  //ejecutar en intervalo de 3 segundos.
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        Common.mUltimaUbicacion = location;
+        displayLocation();
+    }
+
+    private void startLocationUpdates() {
+
+        if (ActivityCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager
+                .PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager
+                .PERMISSION_GRANTED) {
+
+            return;
         }
 
-        private void displayLocation() {
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,
+                mLocationRequest, this
+        );
 
-            if(ActivityCompat.checkSelfPermission(this,
-                    Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager
-                    .PERMISSION_GRANTED
-                    && ActivityCompat.checkSelfPermission(this,
-                    Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager
-                    .PERMISSION_GRANTED)
-            {
+    }
 
-                return;
+    private void displayLocation() {
+
+        if (ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager
+                .PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager
+                .PERMISSION_GRANTED) {
+
+            return;
+        }
+
+        Common.mUltimaUbicacion = LocationServices.
+                FusedLocationApi.
+                getLastLocation(mGoogleApiClient);
+
+        if (Common.mUltimaUbicacion != null) {
+
+            final double latitude = Common.mUltimaUbicacion.getLatitude();
+
+            final double longitud = Common.mUltimaUbicacion.getLongitude();
+
+            if (driverMarker != null) {
+                driverMarker.remove();
             }
 
-            Common.mUltimaUbicacion = LocationServices.
-                    FusedLocationApi.
-                    getLastLocation(mGoogleApiClient);
-
-            if(Common.mUltimaUbicacion != null){
-
-                    final double latitude = Common.mUltimaUbicacion.getLatitude();
-
-                    final double longitud = Common.mUltimaUbicacion.getLongitude();
-
-                    if(driverMarker!= null){
-                        driverMarker.remove();
-                    }
-
-                    driverMarker = mMap.addMarker(
-                            new MarkerOptions().position(new LatLng(
-                                    latitude, longitud
-                            ))
+            driverMarker = mMap.addMarker(
+                    new MarkerOptions().position(new LatLng(
+                            latitude, longitud
+                    ))
                             .title("Usted")
                             .icon(BitmapDescriptorFactory.defaultMarker())
-                    );
+            );
 
-                    mMap.animateCamera(CameraUpdateFactory
-                            .newLatLngZoom(new LatLng(latitude,
+            mMap.animateCamera(CameraUpdateFactory
+                    .newLatLngZoom(new LatLng(latitude,
                                     longitud),
-                                    17.0f
+                            17.0f
                     ));
 
-                    if(direction!= null){
+            if (direction != null) {
 
-                        direction.remove();
-                    }
-                    getDirection();
-
-
-
-            }else{
-
-                Log.d("ERROR", "No se puede obtener la Ubicacion");
+                direction.remove();
             }
+            getDirection();
 
+
+        } else {
+
+            Log.d("ERROR", "No se puede obtener la Ubicacion");
         }
 
+    }
+
     private void getDirection() {
-       LatLng currentPosition = new LatLng(Common.mUltimaUbicacion.getLatitude(),
+        LatLng currentPosition = new LatLng(Common.mUltimaUbicacion.getLatitude(),
                 Common.mUltimaUbicacion.getLongitude()
         );
 
@@ -299,11 +317,11 @@ public class RastreoConductor extends FragmentActivity implements OnMapReadyCall
 
         try {
 
-            requestApi = "https://maps.googleapis.com/maps/api/directions/json?"+
-                    "mode=driving&"+
-                    "transit_routing_preference=less_driving&"+
-                    "origin="+currentPosition.latitude+"," +currentPosition.longitude+
-                    "&destination="+riderLat +","+riderLng;
+            requestApi = "https://maps.googleapis.com/maps/api/directions/json?" +
+                    "mode=driving&" +
+                    "transit_routing_preference=less_driving&" +
+                    "origin=" + currentPosition.latitude + "," + currentPosition.longitude +
+                    "&destination=" + riderLat + "," + riderLng;
 
              /*+"&"+
                     "key="+getResources().getString(R.string.google_direction_api);
@@ -315,11 +333,11 @@ public class RastreoConductor extends FragmentActivity implements OnMapReadyCall
                 @Override
                 public void onResponse(Call<String> call, Response<String> response) {
 
-                    try{
+                    try {
 
-                    new ParseTask().execute(response.body().toString());
+                        new ParseTask().execute(response.body().toString());
 
-                    }catch (Exception e){
+                    } catch (Exception e) {
 
                         e.printStackTrace();
                     }
@@ -333,145 +351,145 @@ public class RastreoConductor extends FragmentActivity implements OnMapReadyCall
                 }
             });
 
-        }catch (Exception e){
+        } catch (Exception e) {
 
             e.printStackTrace();
         }
 
     }
 
-        private void setUpLocation() {
-                if(checkPlayServices()){
+    private void setUpLocation() {
+        if (checkPlayServices()) {
 
-                    buildGoogleApiClient();
-                    createLocationRequest();
-                    displayLocation();
-
-                }
-        }
-
-        private void createLocationRequest() {
-            mLocationRequest = new LocationRequest();
-            mLocationRequest.setInterval(UPDATE_INTERVAL);
-            mLocationRequest.setFastestInterval(FATEST_INTERVAL);
-            mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-            mLocationRequest.setSmallestDisplacement(DISPLACEMENT);
+            buildGoogleApiClient();
+            createLocationRequest();
+            displayLocation();
 
         }
+    }
 
-        private void buildGoogleApiClient() {
-
-            mGoogleApiClient = new GoogleApiClient.Builder(this)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .addApi(LocationServices.API)
-                    .build();
-
-            mGoogleApiClient.connect();
-
-        }
-
-        private boolean checkPlayServices() {
-
-            int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-
-            if(resultCode!= ConnectionResult.SUCCESS){
-
-                if(GooglePlayServicesUtil.isUserRecoverableError(resultCode)){
-                    GooglePlayServicesUtil.getErrorDialog(resultCode,
-                            this,
-                            PLAY_SERVICE_REQUEST_CODE).show();
-                }else{
-                    Toast.makeText(this, "this device is not supported",
-                            Toast.LENGTH_SHORT).show();
-
-                    finish();
-
-                }
-
-                return false;
-
-            }
-
-            return  true;
-        }
-
-        private class ParseTask
-                extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
-
-            ProgressDialog mDialog = new ProgressDialog(RastreoConductor.this
-            );
-
-            @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-                mDialog.setMessage("Por favor, espere.....");
-                mDialog.show();
-            }
-
-            @Override
-            protected List<List<HashMap<String, String>>>
-            doInBackground(String... strings) {
-                JSONObject jsonObject;
-
-                List<List<HashMap<String, String>>> routes = null;
-
-                try{
-
-                    jsonObject = new JSONObject(strings[0]);
-
-                    //De internet.
-                    DirectionJSONParser parser = new DirectionJSONParser();
-                    routes = parser.parse(jsonObject);
-
-
-                }catch (Exception e){
-
-                }
-                return routes;
-            }
-
-            @Override
-            protected void onPostExecute(List<List<HashMap<String, String>>> lists) {
-               mDialog.dismiss();
-
-                ArrayList points = null;
-
-                PolylineOptions polylineOptions = null;
-
-                for (int i=0; i<lists.size(); i++){
-
-                    points = new ArrayList();
-
-                    polylineOptions = new PolylineOptions();
-
-                    List<HashMap<String, String>> path = lists.get(i);
-
-                    for (int j=0; j<path.size(); j++){
-
-                        HashMap<String, String> point =  path.get(j);
-
-                        double lat = Double.parseDouble(point.get("lat"));
-
-                        double lng = Double.parseDouble(point.get("lng"));
-
-                        LatLng position = new LatLng(lat,lng);
-
-                        points.add(position);
-                    }
-
-                    polylineOptions.addAll(points);
-
-                    polylineOptions.width(10);
-
-                    polylineOptions.color(Color.RED);
-
-                    polylineOptions.geodesic(true);
-                }
-
-                direction = mMap.addPolyline(polylineOptions);
-            }
-        }
-
+    private void createLocationRequest() {
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(UPDATE_INTERVAL);
+        mLocationRequest.setFastestInterval(FATEST_INTERVAL);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mLocationRequest.setSmallestDisplacement(DISPLACEMENT);
 
     }
+
+    private void buildGoogleApiClient() {
+
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+
+        mGoogleApiClient.connect();
+
+    }
+
+    private boolean checkPlayServices() {
+
+        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+
+        if (resultCode != ConnectionResult.SUCCESS) {
+
+            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
+                GooglePlayServicesUtil.getErrorDialog(resultCode,
+                        this,
+                        PLAY_SERVICE_REQUEST_CODE).show();
+            } else {
+                Toast.makeText(this, "this device is not supported",
+                        Toast.LENGTH_SHORT).show();
+
+                finish();
+
+            }
+
+            return false;
+
+        }
+
+        return true;
+    }
+
+    private class ParseTask
+            extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
+
+        ProgressDialog mDialog = new ProgressDialog(RastreoConductor.this
+        );
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            mDialog.setMessage("Por favor, espere.....");
+            mDialog.show();
+        }
+
+        @Override
+        protected List<List<HashMap<String, String>>>
+        doInBackground(String... strings) {
+            JSONObject jsonObject;
+
+            List<List<HashMap<String, String>>> routes = null;
+
+            try {
+
+                jsonObject = new JSONObject(strings[0]);
+
+                //De internet.
+                DirectionJSONParser parser = new DirectionJSONParser();
+                routes = parser.parse(jsonObject);
+
+
+            } catch (Exception e) {
+
+            }
+            return routes;
+        }
+
+        @Override
+        protected void onPostExecute(List<List<HashMap<String, String>>> lists) {
+            mDialog.dismiss();
+
+            ArrayList points = null;
+
+            PolylineOptions polylineOptions = null;
+
+            for (int i = 0; i < lists.size(); i++) {
+
+                points = new ArrayList();
+
+                polylineOptions = new PolylineOptions();
+
+                List<HashMap<String, String>> path = lists.get(i);
+
+                for (int j = 0; j < path.size(); j++) {
+
+                    HashMap<String, String> point = path.get(j);
+
+                    double lat = Double.parseDouble(point.get("lat"));
+
+                    double lng = Double.parseDouble(point.get("lng"));
+
+                    LatLng position = new LatLng(lat, lng);
+
+                    points.add(position);
+                }
+
+                polylineOptions.addAll(points);
+
+                polylineOptions.width(10);
+
+                polylineOptions.color(Color.RED);
+
+                polylineOptions.geodesic(true);
+            }
+
+            direction = mMap.addPolyline(polylineOptions);
+        }
+    }
+
+
+}

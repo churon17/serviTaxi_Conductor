@@ -12,6 +12,11 @@ import java.util.List;
 
 public class DirectionJSONParser {
     /** Receives a JSONObject and returns a list of lists containing latitude and longitude */
+    /**
+     * Método parse.
+     * @param jObject parametro necesario para realizar la transformación de Json a una Lisra.
+     * @return nos retorna una Lista de Listas de tipo HashMap<String, String> utilizado para guardar la longitud y latitud.
+     */
     public List<List<HashMap<String,String>>> parse(JSONObject jObject){
 
         List<List<HashMap<String, String>>> routes = new ArrayList<List<HashMap<String,String>>>();
@@ -58,8 +63,8 @@ public class DirectionJSONParser {
         return routes;
     }
 
-    /**
-     * Method to decode polyline points
+    /***
+     * Método para decodificar los Puntos PolyLine para graficar la ruta en GoogleMaps.
      * Courtesy : jeffreysambells.com/2010/05/27/decoding-polylines-from-google-maps-direction-api-with-java
      * */
     private List decodePoly(String encoded) {
@@ -92,8 +97,6 @@ public class DirectionJSONParser {
                     (((double) lng / 1E5)));
             poly.add(p);
         }
-
         return poly;
     }
-
 }

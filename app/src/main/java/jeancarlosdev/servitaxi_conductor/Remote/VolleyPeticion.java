@@ -22,7 +22,10 @@ import java.util.Map;
 
 import jeancarlosdev.servitaxi_conductor.Utilidades.Utilidades;
 
-
+/***
+ * Clase Utilizada para las peticiones en el servidor.
+ * @param <T> el parámetro será fijado sea llamado esta Clase.
+ */
 public class VolleyPeticion<T> extends Request<T> {
 
     private static final String PROTOCOL_CHARSET = "utf-8";
