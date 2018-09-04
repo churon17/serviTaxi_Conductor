@@ -7,17 +7,13 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 
@@ -34,12 +30,9 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Status;
 
-import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
 import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.google.android.gms.maps.CameraUpdate;
@@ -76,53 +69,117 @@ import java.util.TimerTask;
 
 import io.paperdb.Paper;
 import jeancarlosdev.servitaxi_conductor.Common.Common;
-import jeancarlosdev.servitaxi_conductor.Modelos.Cooperativa;
 import jeancarlosdev.servitaxi_conductor.Modelos.Token;
 import jeancarlosdev.servitaxi_conductor.Remote.IGoogleAPI;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
+/***
+ * Clase utilizada para implementar el Mapa de GoogleMaps.
+ * En esta clase también se implementa Places, para buscar ubicaciones en la Api de Places de GoogleMaps.
+ * Implementa tres interfaces necesarias para manipular en tiempo real la ubicación del usuario.
+ * @see com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks
+ * @see com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener
+ * @see com.google.android.gms.location.LocationListener
+ */
 public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         com.google.android.gms.location.LocationListener {
-    //region Atributos
-    ImageButton logout;
 
+    //region Atributos
+
+    /***
+     * Componente ImageButton utilizado para cerrar sesión.
+     */
+    private ImageButton logout;
+
+    /***
+     * Para mostrar el mapa con el que vamos a trabajar.
+     */
     private GoogleMap mMap;
 
+    /***
+     * Para ver si el usuario dio los permisos necesarios de Localización.
+     */
     private static final int PERMISSION_REQUEST_CODE = 7777;
+
+    /***
+     * Para ver si el usuario dio los permisos necesarios de Localización.
+     */
 
     private static final int PLAY_SERVICE_REQUEST_CODE = 7778;
 
+    /***
+     * LocationRequest se utiliza para solicitar una calidad de servicio para las actualizaciones de ubicación desde FusedLocationProviderApi.
+     */
+
     private LocationRequest mLocationRequest;
 
+    /***
+     * Trabaja conjuntamente con LocationRequest, para las actualizaciones de ubicación.
+     */
     private GoogleApiClient mGoogleApiClient;
 
+    /***
+     * Para cambiar el intervalo de actualización de LocationRequest para la ubicación en tiempo real.
+     */
     private static int UPDATE_INTERVAL = 5000;
 
+    /***
+     * Para cambiar el intervalo de actualización de LocationRequest para la ubicación en tiempo real.
+     */
     private static int FATEST_INTERVAL = 3000;
 
+    /***
+     * Para cambiar el intervalo de actualización de LocationRequest para la ubicación en tiempo real.
+     */
     private static int DISPLACEMENT = 5000;
 
+
+    /***
+     * Referencia a la base de datos Conductores.
+     */
     DatabaseReference conductores;
 
-    final Handler hilo = new Handler();
-
+    /***
+     * Para consultas de ubicacion en tiempo real con Firebase.
+     */
     GeoFire geoFire;
 
+    /***
+     * Para agregar o quitar el marcador cuando deseemos dentro de nuestro mapa.
+     */
     Marker mCurrent;
 
+    /***
+     * Switch utilizado para ver si el conductor esta en Linea o fuera de linea.
+     */
     MaterialAnimatedSwitch location_switch;
 
+    /***
+     * El Fragment utilizado para nuestro Mapa.
+     */
     SupportMapFragment mapFragment;
 
+    /***
+     * Instancia de la interfaz IGoogleApi.
+     * @see IGoogleAPI
+     */
     private IGoogleAPI mService;
 
     //region Animacion del Carro Atributos.
+
+    /***
+     * Lista de tipo LatLng para almancenar las rutas.
+     */
     private List<LatLng> polyLineList;
 
+    /***
+     * Marcador del vehículo.
+     */
     private Marker carMarker;
 
     private float v;
@@ -135,14 +192,19 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
 
     private int index, next;
 
+    /***
+     * Componente utilizado para hacer consultas a la Api de Places de Google Maps.
+     */
     private PlaceAutocompleteFragment places;
 
     private String destination;
 
+    /**
+     * Variables utilizadas para crear Polilíneas, para la simulación de rutas.
+     */
     private PolylineOptions polylineOptions, blackPolylineOptions;
 
     private Polyline blackPolyline, greypoPolyline;
-
 
     DatabaseReference onlineRef, currentUserRef;
 
@@ -152,6 +214,12 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
 
     //region Runnable
 
+    /***
+     * Hilo utilizado cuando el usuario utiliza el componente Places, para diagramar la ruta.
+     * La ruta es Diagramada por medio de PolyLineOptions.
+     */
+
+    //region Runnable
     Runnable drawPathRunnable = new Runnable() {
         @Override
         public void run() {
@@ -189,8 +257,6 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
 
                             carMarker.setAnchor(0.5f, 0.5f);
 
-                            carMarker.setRotation(getBearing(startPosition, newPos));
-
                             mMap.moveCamera(CameraUpdateFactory.newCameraPosition(
                                     new CameraPosition.Builder()
                                             .target(newPos)
@@ -208,38 +274,13 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
     };
     //endregion
 
-    //Posicion Vehiculo en movimiento.
-    private float getBearing(LatLng startPosition, LatLng endPosition) {
-
-        double lat = Math.abs(startPosition.latitude - endPosition.latitude);
-
-        double lon = Math.abs(startPosition.longitude - endPosition.longitude);
-
-        if (startPosition.latitude < endPosition.latitude &&
-                startPosition.longitude < endPosition.longitude) {
-
-            return (float) (Math.toDegrees(Math.atan(lon / lat)));
-
-        } else if (startPosition.latitude >= endPosition.latitude &&
-                startPosition.longitude < endPosition.longitude) {
-
-            return (float) ((90 - Math.toDegrees(Math.atan(lon / lat))) + 90);
-
-        } else if (startPosition.latitude >= endPosition.latitude &&
-                startPosition.longitude >= endPosition.longitude) {
-
-            return (float) (Math.toDegrees(Math.atan(lon / lat)) + 180);
-
-        } else if (startPosition.latitude < endPosition.latitude &&
-                startPosition.longitude >= endPosition.longitude) {
-
-            return (float) ((90 - Math.toDegrees(Math.atan(lon / lat))) + 270);
-        }
-        return -1;
-    }
-
 
     //region Metodos propios
+
+    /***
+     * Método que nos ayuda a cambiar la Localización.
+     * Esté metodo checa si el usuario ha dado los permisos necesarios que necesita para obtener la ubicación del Conductor.
+     */
     private void setUpLocation() {
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager
@@ -265,6 +306,11 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
         }
     }
 
+    /**
+     * Este método crea una nueva instancia de tipo LocationRequest.
+     * Esta instancia nos permitirá manipular la ubicación actual del conductor, cada que momento necesitamos actualizar el intervalo.
+     */
+
     private void createLocationRequest() {
         mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(UPDATE_INTERVAL);
@@ -274,6 +320,10 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
 
     }
 
+    /**
+     * Este método crea una nueva instancia de tipo GoogleApiClient.
+     * Esta instancia trabajará conjuntamente con LocationRequest para la manipulación de la clase Actual.
+     */
     private void buildGoogleApiClient() {
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -286,6 +336,11 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
 
     }
 
+    /***
+     * Método que nos ayuda a cerrar sesión, conjuntamente eliminar los datos guardados previamente Con Paper.
+     * Estos datos serán eliminados para que se pueda iniciar una nueva sesión.
+     * En este método también se cierra la instancia de FirebaseAuth, y se redirecciona a la ventana del Login.
+     */
     private void singOut() {
         Paper.init(this);
         Paper.book().destroy();
@@ -296,6 +351,12 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
         finish();
     }
 
+    /***
+     * Método utiliado para verificar si los servicios han sido concedidos por el usuario.
+     * @return boolean.
+     * True si todo esta correcto y los servicios han sido concedidos sin ningún problema.
+     * False si los permisos no han sido concedidos.
+     */
     private boolean checkPlayServices() {
 
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
@@ -307,20 +368,21 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
                         this,
                         PLAY_SERVICE_REQUEST_CODE).show();
             } else {
-                Toast.makeText(this, "this device is not supported",
+                Toast.makeText(this, R.string.notSupported,
                         Toast.LENGTH_SHORT).show();
-
                 finish();
-
             }
 
             return false;
-
         }
 
         return true;
     }
 
+    /***
+     * Método que nos permite dejar de actualizar las localizaciones.
+     * Esté método es necesario para liberar los recursos que no son necesarios.
+     */
     private void stopLocationUpdates() {
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager
@@ -333,9 +395,13 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
         }
 
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient,
-                (com.google.android.gms.location.LocationListener) this);
+                this);
     }
 
+    /***
+     * Método que muestra la ubicación actual y la diagrama con un nuevo marker en el Mapa.
+     * Esté  método a su vez manda a guardar constantemente la ubicación actual por Geofire a Firebase.
+     */
     private void displayLocation() {
 
         if (ActivityCompat.checkSelfPermission(this,
@@ -374,7 +440,7 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
 
                                 mCurrent = mMap.addMarker(new MarkerOptions().
                                         position(new LatLng(latitude, longitud))
-                                        .title("Usted"));
+                                        .title(getResources().getString(R.string.usted)));
 
                                 //Mover la camara del cellPhone a esa posicion.
 
@@ -384,22 +450,22 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
                                                         longitud),
                                                 17.0f));
 
-                                //Dibujar la animation de rotar el carrito.
                             }
                         }
                 );
-                //rotateMarker(mCurrent, -360,  mMap);
             }
-
 
         } else {
 
-            Log.d("ERROR", "No se puede obtener la Ubicacion");
+            Toast.makeText(this, R.string.noUbicacion, Toast.LENGTH_SHORT).show();
         }
 
     }
 
-
+    /**
+     * Esté método nos ayuda para inicializar la busqueda de Actualizaciones de las Localizaciones.
+     * Checando previamente si los permisos estan correcctamente concedidos.
+     */
     private void startLocationUpdates() {
 
         if (ActivityCompat.checkSelfPermission(this,
@@ -418,6 +484,11 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
 
     }
 
+
+    /***
+     * Método que nos obtiene la dirección actual y la de destino ubicada previamente en el componente de Places.
+     * En este método nuevamente utilizamos PolyLineOptions para poder diagramar o figurar la ruta desde la posición actual, hasta el destino escogido.
+     */
     private void getDirection() {
 
         currentPosition = new LatLng(Common.mUltimaUbicacion.getLatitude(),
@@ -433,12 +504,6 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
                     "transit_routing_preference=less_driving&" +
                     "origin=" + currentPosition.latitude + "," + currentPosition.longitude +
                     "&destination=" + destination;
-
-             /*+"&"+
-                    "key="+getResources().getString(R.string.google_direction_api);
-                */
-
-            Log.e("RequestApi", requestApi);
 
             mService.getPath(requestApi).enqueue(new Callback<String>() {
                 @Override
@@ -526,7 +591,7 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
                         carMarker = mMap.addMarker(new MarkerOptions()
                                 .position(currentPosition)
                                 .flat(true)
-                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ruedita)));
+                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.rueda)));
 
                         handler = new Handler();
                         index = -1;
@@ -558,6 +623,12 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        CalligraphyConfig.initDefault(new CalligraphyConfig.
+                Builder()
+                .setDefaultFontPath("fonts/Arkhip_font.ttf").
+                        setFontAttrId(R.attr.fontPath).build());
+
         setContentView(R.layout.frm_bienvenido);
 
         logout = (ImageButton) findViewById(R.id.btn_find_user);
@@ -608,7 +679,7 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
                             //Cambiamos a conectado cuando el Switch esta encendido.
                             FirebaseDatabase.getInstance().goOnline();
 
-                            Snackbar.make(mapFragment.getView(), "En linea", Snackbar.
+                            Snackbar.make(mapFragment.getView(), R.string.onLine, Snackbar.
                                     LENGTH_SHORT).show();
 
                             mMap.setMyLocationEnabled(true);
@@ -647,7 +718,7 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
 
 
                             Snackbar.make(mapFragment.getView(),
-                                    "Fuera de Linea", Snackbar.
+                                    R.string.offLine, Snackbar.
                                             LENGTH_SHORT).show();
 
                             stopLocationUpdates();
@@ -675,8 +746,7 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
         places = (PlaceAutocompleteFragment) getFragmentManager()
                 .findFragmentById(R.id.place_autocomplete_fragment);
 
-        places
-                .setOnPlaceSelectedListener(new PlaceSelectionListener() {
+        places.setOnPlaceSelectedListener(new PlaceSelectionListener() {
                     @Override
                     public void onPlaceSelected(Place place) {
                         if (location_switch.isChecked()) {
@@ -685,13 +755,11 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
 
                             destination = destination.replace(" ", "+");
 
-                            Log.e("Destination", destination);
-
                             getDirection();
                         } else {
 
                             Toast.makeText(Bienvenido.this,
-                                    "Tienes que estar en Linea",
+                                    R.string.YesOnline,
                                     Toast.LENGTH_SHORT).show();
 
                         }
@@ -714,6 +782,10 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
 
     }
 
+    /***
+     * Método que nos sirve para actualizar el Token del Conductor en la Tabla de Firebase.
+     * No recibe parámetros.
+     */
     private void updateFirebaseToken() {
         FirebaseDatabase db = FirebaseDatabase.getInstance();
         DatabaseReference tokens = db.getReference(Common.token_tb1);
@@ -723,7 +795,11 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
 
     }
 
-    //Download on GitHub.
+    /***
+     * Método para decodificar los Puntos PolyLine para graficar la ruta en GoogleMaps.
+     * Courtesy : jeffreysambells.com/2010/05/27/decoding-polylines-from-google-maps-direction-api-with-java
+     * GitHub
+     * */
     private List decodePoly(String encoded) {
 
         List poly = new ArrayList();
@@ -783,7 +859,6 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
         mMap.setTrafficEnabled(false);
@@ -793,8 +868,6 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
         mMap.setIndoorEnabled(false);
 
         mMap.getUiSettings().setZoomControlsEnabled(true);
-
-
     }
 
     @Override
@@ -817,14 +890,7 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
     @Override
     public void onLocationChanged(Location location) {
 
-        Log.e("Cambio de ubicacion", "Yes");
-
         Common.mUltimaUbicacion = location;
-
-        Log.e("Latitudddddd", Common.mUltimaUbicacion.getLatitude() + "");
-
-        Log.e("Longitudddddd", Common.mUltimaUbicacion.getLongitude() + "");
-
         displayLocation();
     }
 }

@@ -22,4 +22,11 @@
     <string name="etxtIngreseApellido">Ingrese su apellido</string>
     <string name="etxtCoop">Cooperativa</string>
     <string name="etxtIngresePlaca">Ingrese placa de su vehiculo</string>
+    <string name="notSupported">Este dispositivo no está soportado</string>
+    <string name="usted">Usted</string>
+    <string name="noUbicacion">No se pudo obtener la ubicación</string>
+    <string name="onLine">En Linea</string>
+    <string name="offLine">Fuera de Linea</string>
+    <string name="YesOnline">Tienes que estar en Linea</string>
+    <string name="ocurrioUnError">Ocurrio un error</string>
 </resources>

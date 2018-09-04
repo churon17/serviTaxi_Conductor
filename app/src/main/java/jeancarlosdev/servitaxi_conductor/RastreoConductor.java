@@ -75,6 +75,9 @@ public class RastreoConductor extends FragmentActivity implements OnMapReadyCall
         GoogleApiClient.ConnectionCallbacks,
         LocationListener {
 
+    /***
+     * Para mostrar el mapa con el que vamos a trabajar.
+     */
     private GoogleMap mMap;
 
     double riderLat;
@@ -83,17 +86,36 @@ public class RastreoConductor extends FragmentActivity implements OnMapReadyCall
 
     String customerId;
 
+    /***
+     * Para ver si el usuario dio los permisos necesarios de Localización.
+     */
     private static final int PLAY_SERVICE_REQUEST_CODE = 7778;
 
+    /***
+     * LocationRequest se utiliza para solicitar una calidad de servicio para las actualizaciones de ubicación desde FusedLocationProviderApi.
+     */
     private LocationRequest mLocationRequest;
 
+    /***
+     * Trabaja conjuntamente con LocationRequest, para las actualizaciones de ubicación.
+     */
     private GoogleApiClient mGoogleApiClient;
 
+    /***
+     * Para cambiar el intervalo de actualización de LocationRequest para la ubicación en tiempo real.
+     */
     private static int UPDATE_INTERVAL = 5000;
 
+    /***
+     * Para cambiar el intervalo de actualización de LocationRequest para la ubicación en tiempo real.
+     */
     private static int FATEST_INTERVAL = 3000;
 
+    /***
+     * Para cambiar el intervalo de actualización de LocationRequest para la ubicación en tiempo real.
+     */
     private static int DISPLACEMENT = 5000;
+
 
     private Circle riderMarker;
 
@@ -101,10 +123,17 @@ public class RastreoConductor extends FragmentActivity implements OnMapReadyCall
 
     private Polyline direction;
 
+    /***
+     * Instancia de la interfaz IGoogleApi.
+     * @see IGoogleAPI
+     */
     IGoogleAPI mService;
 
     IFCMService mFCMService;
 
+    /***
+     * Para consultas de ubicacion en tiempo real con Firebase.
+     */
     GeoFire geoFire;
 
 
@@ -172,6 +201,11 @@ public class RastreoConductor extends FragmentActivity implements OnMapReadyCall
         });
     }
 
+
+    /**
+     * Enviar la notificacion al Cliente cuando el conductor ha llegado al radio de la ubicación del cliente.
+     * @param customerId
+     */
     private void sendArriveNotification(String customerId) {
         Token token = new Token(customerId);
         Notification notification = new Notification("Llegada", String.format("El conductor %s ha llegado", Common.currentUser.getNombre()));
@@ -236,6 +270,10 @@ public class RastreoConductor extends FragmentActivity implements OnMapReadyCall
         displayLocation();
     }
 
+    /**
+     * Esté método nos ayuda para inicializar la busqueda de Actualizaciones de las Localizaciones.
+     * Checando previamente si los permisos estan correcctamente concedidos.
+     */
     private void startLocationUpdates() {
 
         if (ActivityCompat.checkSelfPermission(this,
@@ -254,6 +292,10 @@ public class RastreoConductor extends FragmentActivity implements OnMapReadyCall
 
     }
 
+    /***
+     * Método que muestra la ubicación actual y la diagrama con un nuevo marker en el Mapa.
+     * Esté  método a su vez manda a guardar constantemente la ubicación actual por Geofire a Firebase.
+     */
     private void displayLocation() {
 
         if (ActivityCompat.checkSelfPermission(this,
@@ -308,6 +350,10 @@ public class RastreoConductor extends FragmentActivity implements OnMapReadyCall
 
     }
 
+    /***
+     * Método que nos obtiene la dirección actual y la de destino ubicada previamente en el componente de Places.
+     * En este método nuevamente utilizamos PolyLineOptions para poder diagramar o figurar la ruta desde la posición actual, hasta el destino escogido.
+     */
     private void getDirection() {
         LatLng currentPosition = new LatLng(Common.mUltimaUbicacion.getLatitude(),
                 Common.mUltimaUbicacion.getLongitude()
@@ -358,6 +404,10 @@ public class RastreoConductor extends FragmentActivity implements OnMapReadyCall
 
     }
 
+    /***
+     * Método que nos ayuda a cambiar la Localización.
+     * Esté metodo checa si el usuario ha dado los permisos necesarios que necesita para obtener la ubicación del Conductor.
+     */
     private void setUpLocation() {
         if (checkPlayServices()) {
 
@@ -368,6 +418,12 @@ public class RastreoConductor extends FragmentActivity implements OnMapReadyCall
         }
     }
 
+
+    /**
+     * Este método crea una nueva instancia de tipo LocationRequest.
+     * Esta instancia nos permitirá manipular la ubicación actual del conductor, cada que momento necesitamos actualizar el intervalo.
+     */
+
     private void createLocationRequest() {
         mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(UPDATE_INTERVAL);
@@ -377,6 +433,10 @@ public class RastreoConductor extends FragmentActivity implements OnMapReadyCall
 
     }
 
+    /**
+     * Este método crea una nueva instancia de tipo GoogleApiClient.
+     * Esta instancia trabajará conjuntamente con LocationRequest para la manipulación de la clase Actual.
+     */
     private void buildGoogleApiClient() {
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -389,6 +449,12 @@ public class RastreoConductor extends FragmentActivity implements OnMapReadyCall
 
     }
 
+    /***
+     * Método utiliado para verificar si los servicios han sido concedidos por el usuario.
+     * @return boolean.
+     * True si todo esta correcto y los servicios han sido concedidos sin ningún problema.
+     * False si los permisos no han sido concedidos.
+     */
     private boolean checkPlayServices() {
 
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
@@ -414,8 +480,7 @@ public class RastreoConductor extends FragmentActivity implements OnMapReadyCall
         return true;
     }
 
-    private class ParseTask
-            extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
+    private class ParseTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
 
         ProgressDialog mDialog = new ProgressDialog(RastreoConductor.this
         );

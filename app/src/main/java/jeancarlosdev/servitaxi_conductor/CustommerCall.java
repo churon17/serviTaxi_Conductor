@@ -40,7 +40,13 @@ import jeancarlosdev.servitaxi_conductor.Remote.IGoogleAPI;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 
+
+/***
+ * Clase utilizada para visualizar CustomerCall Layout.
+ * Esta clase respectivamente con el Layout será invocada solamemte cuando desde serviTaxi Cliente haya solictado en Llamar Taxi.
+ */
 public class CustommerCall extends AppCompatActivity {
 
     TextView txt_time, txt_address, txt_distance;
@@ -66,6 +72,12 @@ public class CustommerCall extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        CalligraphyConfig.initDefault(new CalligraphyConfig.
+                Builder()
+                .setDefaultFontPath("fonts/Arkhip_font.ttf").
+                        setFontAttrId(R.attr.fontPath).build());
+
         setContentView(R.layout.activity_custommer_call);
 
         mService = Common.getIGoogleAPI();
@@ -120,12 +132,17 @@ public class CustommerCall extends AppCompatActivity {
             lat = getIntent().getDoubleExtra("lat", -1.0);
             lng = getIntent().getDoubleExtra("lng", -1.0);
             customerId = getIntent().getStringExtra("customer");
-
             getDirection(lat, lng);
         }
 
     }
 
+    /***
+     * Este método nos sirve para enviar la Notificación al Cliente, ya sea la respuesta positiva o negativa.
+     * @param customerId id del cliente.
+     * @param title Titulo de la notificacion.
+     * @param body El cuerpo de la notificacion.
+     */
     private void notificationBooking(String customerId, String title, String body) {
         Token token = new Token(customerId);
 
@@ -138,8 +155,11 @@ public class CustommerCall extends AppCompatActivity {
                     @Override
                     public void onResponse(Call<FCMResponse> call,
                                            Response<FCMResponse> response) {
+
                         if(response.body().success ==1){
+
                             Toast.makeText(CustommerCall.this,
+
                                     "Cancelado",
                                     Toast.LENGTH_SHORT);
 
@@ -156,6 +176,13 @@ public class CustommerCall extends AppCompatActivity {
 
     }
 
+
+    /***
+     * Método que nos obtiene la dirección actual y la de destino ubicada previamente en el componente de Places.
+     * En este método nuevamente utilizamos PolyLineOptions para poder diagramar o figurar la ruta desde la posición actual, hasta el destino escogido.
+     * @param lat latitud del destino.
+     * @param lng longitud del destino.
+     */
     private void getDirection(double lat, double lng) {
 
         String requestApi = null;
@@ -167,10 +194,6 @@ public class CustommerCall extends AppCompatActivity {
                     "transit_routing_preference=less_driving&"+
                     "origin="+ Common.mUltimaUbicacion.getLatitude()+"," +Common.mUltimaUbicacion.getLongitude()+
                     "&destination="+lat+","+lng ;
-
-             /*+"&"+
-                    "key="+getResources().getString(R.string.google_direction_api);
-                */
 
             Log.e("RequestApi", requestApi);
 

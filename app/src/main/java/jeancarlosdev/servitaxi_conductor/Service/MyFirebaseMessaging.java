@@ -9,7 +9,16 @@ import com.google.gson.Gson;
 
 import jeancarlosdev.servitaxi_conductor.CustommerCall;
 
+/***
+ * Clase utilizada para la recepción de la Notificacion.
+ */
 public class MyFirebaseMessaging extends FirebaseMessagingService {
+
+    /***
+     * Sobreescribimos el método onMessageReceived, cuando se reciba  el RemoteMessage se iniciara una nueva actividad.
+     * Esté método se ejecuta automáticamente cuando se reciba el RemoteMessage.
+     * @param remoteMessage
+     */
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {

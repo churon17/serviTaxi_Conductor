@@ -51,34 +51,56 @@ import jeancarlosdev.servitaxi_conductor.Remote.VolleyTiposError;
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
+/**
+ * Clase que nos ayudará para el inicio de sesión y el registrar por parte del Conductor.
+ */
+
 public class Login_1 extends AppCompatActivity {
 
     Button btnSignIn, btnRegister;
 
+    /**
+     * Atributo para poder utilizar la Base de Datos de Firebase
+     */
     FirebaseDatabase db;
 
+    /**
+     * Atributo para hacer referencia a la tabla conductores.
+     */
     DatabaseReference conductores;
 
     RelativeLayout layoutPrincipal;
 
+    /**
+     * Para la Autentificación con Firebase.
+     */
     FirebaseAuth auth;
 
+    /***
+     * Para poder realizar las peticiones con Volley
+     */
     private RequestQueue requestQueue;
+
 
     private String[] listaCooperativas;
 
     HashMap<String, String> mapa;
 
     String NombreCoop = "";
+
     @Override
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
+
+    /***
+     * Método invocado cuando se crea la Actividad.
+     * En esté método inicializamos todas las variables a utilizar y hacemos llamados a algunos métodos como setOnClickListener para los botones.
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-
         super.onCreate(savedInstanceState);
         CalligraphyConfig.initDefault(new CalligraphyConfig.
                 Builder()
@@ -93,7 +115,7 @@ public class Login_1 extends AppCompatActivity {
 
         requestQueue = Volley.newRequestQueue(getApplicationContext());
 
-        consultaNoticias();
+        consultaCooperativas();
 
         db = FirebaseDatabase.getInstance();
 
@@ -108,13 +130,23 @@ public class Login_1 extends AppCompatActivity {
         btnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mostrarVentanaRegistro();
+                try {
+
+                    mostrarVentanaRegistro();
+
+                }catch (Exception e ){
+
+                    Toast.makeText(Login_1.this, R.string.ocurrioUnError, Toast.LENGTH_SHORT).show();
+                }
+
+
             }
         });
 
         btnSignIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 mostrarVentanaLogin();
             }
         });
@@ -129,6 +161,14 @@ public class Login_1 extends AppCompatActivity {
             }
         }
     }
+
+    /**
+     * Método que nos ayudará para verificar si previamente ha existido una sesión y no se ha cerrado.
+     * Si es que no se ha cerrado la sesión automaticamente lo Redirigira a la Actividad Bienvenido.
+     * @param user para verificar con Firebase y el servicio.
+     * @param pass para verificar con Firebase y el servicio.
+     * Estos dos parametros se obtendran previamente de los Paper.
+     */
 
     private void autoLogin(String user, String pass) {
 
@@ -182,6 +222,9 @@ public class Login_1 extends AppCompatActivity {
 
     }
 
+    /***
+     * Muestra la ventana para Loguear al Conductor, este autentificación se hace tanto para Firebase como para el Servicio.
+     */
     private void mostrarVentanaLogin() {
         final AlertDialog.Builder dialogInicio = new AlertDialog.Builder(this);
 
@@ -320,6 +363,9 @@ public class Login_1 extends AppCompatActivity {
         return NombreCoop;
     }
 
+    /***
+     * Muestra la ventana para registrar al Conductor, este registro se hace tanto para Firebase como para el Servicio.
+     */
     private void mostrarVentanaRegistro() {
 
         AlertDialog.Builder dialog = new AlertDialog.Builder(this);
@@ -672,7 +718,12 @@ public class Login_1 extends AppCompatActivity {
         dialog.show();
     }
 
-    private void consultaNoticias() {
+
+    /**
+     * Este método nos permite listar Todas las cooperativas, para el registro del Conductor.
+     * No recibe parámetros.
+     */
+    private void consultaCooperativas() {
 
         VolleyPeticion<Cooperativa[]> listaNoticias = Conexion.listaCooperativas(
                 getApplicationContext(),
