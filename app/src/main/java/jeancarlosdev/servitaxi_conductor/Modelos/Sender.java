@@ -36,7 +36,7 @@ public class Sender {
     }
 
     /**
-     *
+     * Devuelve un valor de tipo String correspondiente al valor del atributo to.
      * @return Obtiene el atributo to, de la clase Notification.
      */
     public String getTo() {
@@ -53,8 +53,9 @@ public class Sender {
     }
 
     /**
-     *
+     * Devuelve un valor de tipo Notification correspondiente al atributo notification.
      * @return Obtiene el objeto o atributo notificcation, de la clase Sender.
+     * @see Notification
      */
     public Notification getNotification() {
         return notification;

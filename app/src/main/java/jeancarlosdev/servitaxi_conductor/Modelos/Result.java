@@ -26,7 +26,7 @@ public class Result {
     }
 
     /**
-     *
+     *  Devuelve un valor de tipo String message_id.
      * @return Obtiene el atributo message_id, de la clase Result.
      */
     public String getMessage_id() {

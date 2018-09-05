@@ -33,7 +33,7 @@ public class Notification {
     }
 
     /**
-     *
+     * Devuelve un valor de tipo Strin correspondiente al atributo title.
      * @return Obtiene el atributo title, de la clase Notification.
      */
     public String getTitle() {
@@ -48,7 +48,7 @@ public class Notification {
         this.title = title;
     }
     /**
-     *
+     *  Devuelve un valor de tipo String correspondiente al atributo body.
      * @return Obtiene el atributo body, de la clase Notification.
      */
     public String getBody() {

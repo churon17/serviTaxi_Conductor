@@ -8,7 +8,7 @@ public class Token {
 
     /***
      * Atributo utilizado para guardar el token.
-     * De tipo String
+     * Tipo de dato de tipo String
      */
     private String token;
 
@@ -31,7 +31,7 @@ public class Token {
 
 
     /**
-     *
+     * Devuleve el valor de tipo String correspondiente al valor del atributo token.
      * @return Obtiene el atributo token, de la clase Token.
      */
     public String getToken() {

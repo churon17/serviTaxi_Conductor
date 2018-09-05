@@ -310,7 +310,6 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
      * Este método crea una nueva instancia de tipo LocationRequest.
      * Esta instancia nos permitirá manipular la ubicación actual del conductor, cada que momento necesitamos actualizar el intervalo.
      */
-
     private void createLocationRequest() {
         mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(UPDATE_INTERVAL);
@@ -399,7 +398,7 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
     }
 
     /***
-     * Método que muestra la ubicación actual y la diagrama con un nuevo marker en el Mapa.
+     * Método que muestra la ubicación actual y la muestra con un nuevo marker en el Mapa.
      * Esté  método a su vez manda a guardar constantemente la ubicación actual por Geofire a Firebase.
      */
     private void displayLocation() {

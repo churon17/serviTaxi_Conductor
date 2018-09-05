@@ -53,7 +53,7 @@ public class Conductor {
     }
 
     /**
-     *
+     *Devuelve el valor del atributo email de la clase Conductor.
      * @return Obtiene el atributo email, de la clase conductor.
      */
     public String getEmail() {
@@ -69,7 +69,7 @@ public class Conductor {
     }
 
     /**
-     *
+     *  Devuelve el valor del atributo nombre de la clase Conductor.
      * @return Obtiene el atributo nombre, de la clase conductor.
      */
     public String getNombre() {
@@ -85,7 +85,7 @@ public class Conductor {
     }
 
     /**
-     *
+     * Devuelve el valor del atributo password de la clase Conductor.
      * @return Obtiene el atributo password(Contraseña), de la clase conductor.
      */
     public String getPassword() {
@@ -101,7 +101,7 @@ public class Conductor {
     }
 
     /**
-     *
+     * Devuelve el valor del atributo apellido de la clase Conductor.
      * @return Obtiene el atributo apellido, de la clase conductor.
      */
     public String getApellido() {

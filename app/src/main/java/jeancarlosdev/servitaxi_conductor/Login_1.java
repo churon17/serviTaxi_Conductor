@@ -57,8 +57,17 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class Login_1 extends AppCompatActivity {
 
-    Button btnSignIn, btnRegister;
+    /***
+     * Botón que nos ayudará para abrir la ventana de Login.
+     */
 
+    Button btnSignIn;
+
+    /**
+     * Botón que nos ayudará a abrir la ventana de Registro.
+     */
+
+    Button btnRegister;
     /**
      * Atributo para poder utilizar la Base de Datos de Firebase
      */
@@ -69,6 +78,9 @@ public class Login_1 extends AppCompatActivity {
      */
     DatabaseReference conductores;
 
+    /***
+     * Variable de tipo RelativeLayout para posteriormente hacer uso del mismo en distintas métodos.
+     */
     RelativeLayout layoutPrincipal;
 
     /**
@@ -82,8 +94,14 @@ public class Login_1 extends AppCompatActivity {
     private RequestQueue requestQueue;
 
 
+    /***
+     * Variable de tipo arreglo para  almacenar las Cooperativas que hay en el servidor.
+     */
     private String[] listaCooperativas;
 
+    /***
+     * HashMap utilizado para constantemente enviar y recibir información del servidor.
+     */
     HashMap<String, String> mapa;
 
     String NombreCoop = "";
@@ -169,7 +187,6 @@ public class Login_1 extends AppCompatActivity {
      * @param pass para verificar con Firebase y el servicio.
      * Estos dos parametros se obtendran previamente de los Paper.
      */
-
     private void autoLogin(String user, String pass) {
 
         final android.app.AlertDialog dialogoEspera = new SpotsDialog(Login_1.this);
@@ -356,6 +373,11 @@ public class Login_1 extends AppCompatActivity {
 
     }
 
+    /**
+     * Método que actúa como Setter para la variable Cooperativa.
+     * @param nombre el nombre que va a ser asignado a la variable Cooperativa.
+     * @return el nombre de la Cooperativa.
+     */
     private String retornarNombreCoop(String nombre){
 
         NombreCoop = nombre;

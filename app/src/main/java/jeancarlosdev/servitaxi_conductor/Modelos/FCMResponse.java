@@ -57,7 +57,7 @@ public class FCMResponse {
     }
 
     /**
-     *
+     * Devuelve el valor del atributo multicast_id
      * @return Obtiene el atributo multicast_id, de la clase FCMResponse.
      */
     public long getMulticast_id() {

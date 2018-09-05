@@ -19,7 +19,6 @@ public class MyFirebaseMessaging extends FirebaseMessagingService {
      * Esté método se ejecuta automáticamente cuando se reciba el RemoteMessage.
      * @param remoteMessage
      */
-
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
 
