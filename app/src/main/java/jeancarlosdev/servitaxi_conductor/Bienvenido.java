@@ -686,28 +686,27 @@ public class Bienvenido extends FragmentActivity implements OnMapReadyCallback,
 
                             startLocationUpdates();
 
-                            final Handler handler = new Handler();
-                            Timer timer = new Timer();
+                        //    final Handler handler = new Handler();
+                          //  Timer timer = new Timer();
 
-                            TimerTask task = new TimerTask() {
-                                @Override
-                                public void run() {
-                                    handler.post(new Runnable() {
-                                        public void run() {
-                                            try {
+                            //TimerTask task = new TimerTask() {
+                              //  @Override
+                               // public void run() {
+                              //      handler.post(new Runnable() {
+                                 //       public void run() {
+                                //            try {
 
                                                 displayLocation();
 
-                                            } catch (Exception e) {
-                                                Log.e("error", e.getMessage());
-                                            }
-                                        }
-                                    });
-                                }
-                            };
+                                  //          } catch (Exception e) {
+                                   //             Log.e("error", e.getMessage());
+                                    //        }
+                                      //  }
+                                    //});
+                                //}
+                            //};
 
-                            timer.schedule(task, 0, 3000);  //ejecutar en intervalo de 3 segundos.
-
+                            //timer.schedule(task, 0, 3000);  //ejecutar en intervalo de 3 segundos.
 
 
                         } else {

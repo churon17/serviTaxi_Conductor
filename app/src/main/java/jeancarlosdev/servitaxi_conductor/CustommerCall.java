@@ -118,8 +118,8 @@ public class CustommerCall extends AppCompatActivity {
                 intencion.putExtra("lng", lng);
                 intencion.putExtra("customerId", customerId);
 
-                agregarDireccion(lat, lng);
-                agregarCarrera();
+              //  agregarDireccion(lat, lng);
+             //   agregarCarrera();
 
                 if(!TextUtils.isEmpty(customerId)) {
                     notificationBooking(customerId, "Aceptado", "El Taxi llegará en " + tiempo);
@@ -139,6 +139,9 @@ public class CustommerCall extends AppCompatActivity {
         if (getIntent() != null){
             lat = getIntent().getDoubleExtra("lat", -1.0);
             lng = getIntent().getDoubleExtra("lng", -1.0);
+
+            Log.e("Lat", lat + "");
+            Log.e("Long" , lng + "");
             customerId = getIntent().getStringExtra("customer");
             external = getIntent().getStringExtra("external");
             getDirection(lat, lng);
@@ -147,11 +150,15 @@ public class CustommerCall extends AppCompatActivity {
     }
 
     private void agregarCarrera() {
+
         external_direccion = obtenerExternalDirección(direccion);
 
         HashMap<String, String> mapa = new HashMap<>();
+
         mapa.put("id_unidad", String.valueOf(Paper.book().read(Common.external_unidad)));
+
         mapa.put("id_direccion", external_direccion);
+
         mapa.put("id_cliente", external);
 
         VolleyPeticion<MensajeBackJson> agregarDir = Conexion.registrarDireccion(
@@ -226,6 +233,8 @@ public class CustommerCall extends AppCompatActivity {
                 new com.android.volley.Response.Listener<MensajeBackJson>() {
                     @Override
                     public void onResponse(MensajeBackJson response) {
+
+                        Log.e("Response", response.mensaje + "");
                         if (response != null && ("FD".equalsIgnoreCase(response.siglas)
                                 || "DNF".equalsIgnoreCase(response.siglas))) {
                             Log.e("DIRECCION", response.mensaje);
@@ -303,8 +312,11 @@ public class CustommerCall extends AppCompatActivity {
                     "mode=driving&"+
                     "transit_routing_preference=less_driving&"+
                     "origin="+ Common.mUltimaUbicacion.getLatitude()+"," +Common.mUltimaUbicacion.getLongitude()+
-                    "&destination="+lat+","+lng ;
+                    "&destination="+lat+","+lng;
 
+           /* +"&"+
+                    "key="+getResources().getString(R.string.google_direction_api);
+            */
             Log.e("RequestApi", requestApi);
 
             mService.getPath(requestApi).enqueue(new Callback<String>() {
@@ -323,14 +335,19 @@ public class CustommerCall extends AppCompatActivity {
                         JSONObject legsObject = legs.getJSONObject(0);
 
                         JSONObject distance = legsObject.getJSONObject("distance");
+
                         txt_distance.setText(distance.getString("text"));
 
                         JSONObject time = legsObject.getJSONObject("duration");
+
                         txt_time.setText(time.getString("text"));
+
                         tiempo = time.getString("text");
 
                         String address = legsObject.getString("end_address");
+
                         txt_address.setText(address);
+
                         direccion = address;
 
                     }catch (Exception e){

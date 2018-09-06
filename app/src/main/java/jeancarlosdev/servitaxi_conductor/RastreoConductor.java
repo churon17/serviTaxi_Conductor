@@ -234,24 +234,24 @@ public class RastreoConductor extends FragmentActivity implements OnMapReadyCall
         final Handler handler = new Handler();
         Timer timer = new Timer();
 
-        TimerTask task = new TimerTask() {
-            @Override
-            public void run() {
-                handler.post(new Runnable() {
-                    public void run() {
-                        try {
+      //  TimerTask task = new TimerTask() {
+        //    @Override
+          //  public void run() {
+            //    handler.post(new Runnable() {
+               //     public void run() {
+              //        try {
 
                             displayLocation();
 
-                        } catch (Exception e) {
-                            Log.e("error", e.getMessage());
-                        }
-                    }
-                });
-            }
-        };
+                  //      } catch (Exception e) {
+                      //      Log.e("error", e.getMessage());
+                    //    }
+                    //}
+                //});
+            //}
+        //};
 
-        timer.schedule(task, 0, 3000);  //ejecutar en intervalo de 3 segundos.
+        //timer.schedule(task, 0, 3000);  //ejecutar en intervalo de 3 segundos.
     }
 
     @Override
@@ -369,9 +369,10 @@ public class RastreoConductor extends FragmentActivity implements OnMapReadyCall
                     "origin=" + currentPosition.latitude + "," + currentPosition.longitude +
                     "&destination=" + riderLat + "," + riderLng;
 
-             /*+"&"+
+            /*
+             +"&"+
                     "key="+getResources().getString(R.string.google_direction_api);
-                */
+            */
 
             Log.e("RequestApi", requestApi);
 
@@ -400,6 +401,7 @@ public class RastreoConductor extends FragmentActivity implements OnMapReadyCall
         } catch (Exception e) {
 
             e.printStackTrace();
+
         }
 
     }

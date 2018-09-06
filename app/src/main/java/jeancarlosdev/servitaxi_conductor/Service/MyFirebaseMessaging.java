@@ -1,6 +1,7 @@
 package jeancarlosdev.servitaxi_conductor.Service;
 
 import android.content.Intent;
+import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.messaging.FirebaseMessagingService;
@@ -34,8 +35,11 @@ public class MyFirebaseMessaging extends FirebaseMessagingService {
         intent.putExtra("lat", customer_location.latitude);
 
         intent.putExtra("lng", customer_location.longitude);
+
         intent.putExtra("customer", arreglo[0]);
+
         intent.putExtra("external", arreglo[1]);
+
         startActivity(intent);
     }
 }
