@@ -27,13 +27,15 @@ public class MyFirebaseMessaging extends FirebaseMessagingService {
                         .getNotification()
                         .getBody(), LatLng.class);
 
+        String [] arreglo = remoteMessage.getNotification().getTitle().split(";");
+
         Intent intent = new Intent(getBaseContext(), CustommerCall.class);
 
         intent.putExtra("lat", customer_location.latitude);
 
         intent.putExtra("lng", customer_location.longitude);
-
-        intent.putExtra("customer", remoteMessage.getNotification().getTitle());
+        intent.putExtra("customer", arreglo[0]);
+        intent.putExtra("external", arreglo[1]);
         startActivity(intent);
     }
 }

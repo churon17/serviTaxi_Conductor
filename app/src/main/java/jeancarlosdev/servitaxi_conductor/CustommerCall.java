@@ -20,6 +20,7 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 
+import io.paperdb.Paper;
 import jeancarlosdev.servitaxi_conductor.Common.Common;
 import jeancarlosdev.servitaxi_conductor.Modelos.FCMResponse;
 import jeancarlosdev.servitaxi_conductor.Modelos.MensajeBackJson;
@@ -59,6 +60,10 @@ public class CustommerCall extends AppCompatActivity {
     String tiempo = "";
 
     String direccion = "";
+
+    String external = "";
+
+    String external_direccion = "";
 
     Double lat;
 
@@ -114,6 +119,7 @@ public class CustommerCall extends AppCompatActivity {
                 intencion.putExtra("customerId", customerId);
 
                 agregarDireccion(lat, lng);
+                agregarCarrera();
 
                 if(!TextUtils.isEmpty(customerId)) {
                     notificationBooking(customerId, "Aceptado", "El Taxi llegará en " + tiempo);
@@ -134,9 +140,78 @@ public class CustommerCall extends AppCompatActivity {
             lat = getIntent().getDoubleExtra("lat", -1.0);
             lng = getIntent().getDoubleExtra("lng", -1.0);
             customerId = getIntent().getStringExtra("customer");
+            external = getIntent().getStringExtra("external");
             getDirection(lat, lng);
         }
 
+    }
+
+    private void agregarCarrera() {
+        external_direccion = obtenerExternalDirección(direccion);
+
+        HashMap<String, String> mapa = new HashMap<>();
+        mapa.put("id_unidad", String.valueOf(Paper.book().read(Common.external_unidad)));
+        mapa.put("id_direccion", external_direccion);
+        mapa.put("id_cliente", external);
+
+        VolleyPeticion<MensajeBackJson> agregarDir = Conexion.registrarDireccion(
+                getApplicationContext(),
+                mapa,
+                new com.android.volley.Response.Listener<MensajeBackJson>() {
+                    @Override
+                    public void onResponse(MensajeBackJson response) {
+                        if (response != null && ("FD".equalsIgnoreCase(response.siglas)
+                                || "DNF".equalsIgnoreCase(response.siglas))) {
+                            Log.e("DIRECCION", response.mensaje);
+                        } else {
+                            Log.e("DIRECCION", "Se agregó correctamente");
+                        }
+                    }
+                },
+                new com.android.volley.Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("Error", error.toString());
+
+                        return;
+                    }
+                }
+        );
+
+        requestQueue.add(agregarDir);
+    }
+
+    private String obtenerExternalDirección(String nombreDir) {
+        HashMap<String, String> mapa = new HashMap<>();
+        mapa.put("id_unidad", nombreDir);
+
+        VolleyPeticion<MensajeBackJson> agregarDir = Conexion.retornarExternalDirección(
+                getApplicationContext(),
+                mapa,
+                new com.android.volley.Response.Listener<MensajeBackJson>() {
+                    @Override
+                    public void onResponse(MensajeBackJson response) {
+                        if (response != null && ("FD".equalsIgnoreCase(response.siglas)
+                                || "DNF".equalsIgnoreCase(response.siglas))) {
+                            Log.e("DIRECCION", response.mensaje);
+                        } else {
+                            external_direccion = response.mensaje;
+                        }
+                    }
+                },
+                new com.android.volley.Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("Error", error.toString());
+
+                        return;
+                    }
+                }
+        );
+
+        requestQueue.add(agregarDir);
+
+        return external_direccion;
     }
 
     private void agregarDireccion(Double latitud, Double longitud) {
@@ -144,8 +219,6 @@ public class CustommerCall extends AppCompatActivity {
         mapa.put("nombre",  direccion);
         mapa.put("latitud", String.valueOf(latitud));
         mapa.put("longitud", String.valueOf(longitud));
-
-        Log.e("************CUSTOMER**", customerId);
 
         VolleyPeticion<MensajeBackJson> agregarDir = Conexion.registrarDireccion(
                 getApplicationContext(),
