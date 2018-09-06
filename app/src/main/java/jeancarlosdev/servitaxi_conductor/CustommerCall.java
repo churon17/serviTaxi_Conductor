@@ -3,6 +3,7 @@ package jeancarlosdev.servitaxi_conductor;
 import android.animation.ValueAnimator;
 import android.content.Intent;
 import android.graphics.Color;
+import android.location.Geocoder;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
@@ -15,6 +16,9 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -28,15 +32,20 @@ import com.google.android.gms.maps.model.SquareCap;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.HashMap;
 import java.util.List;
 
+import io.paperdb.Paper;
 import jeancarlosdev.servitaxi_conductor.Common.Common;
 import jeancarlosdev.servitaxi_conductor.Modelos.FCMResponse;
+import jeancarlosdev.servitaxi_conductor.Modelos.MensajeBackJson;
 import jeancarlosdev.servitaxi_conductor.Modelos.Notification;
 import jeancarlosdev.servitaxi_conductor.Modelos.Sender;
 import jeancarlosdev.servitaxi_conductor.Modelos.Token;
+import jeancarlosdev.servitaxi_conductor.Remote.Conexion;
 import jeancarlosdev.servitaxi_conductor.Remote.IFCMService;
 import jeancarlosdev.servitaxi_conductor.Remote.IGoogleAPI;
+import jeancarlosdev.servitaxi_conductor.Remote.VolleyPeticion;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -65,9 +74,13 @@ public class CustommerCall extends AppCompatActivity {
 
     String tiempo = "";
 
+    String direccion = "";
+
     Double lat;
 
     Double lng;
+
+    private RequestQueue requestQueue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +92,8 @@ public class CustommerCall extends AppCompatActivity {
                         setFontAttrId(R.attr.fontPath).build());
 
         setContentView(R.layout.activity_custommer_call);
+
+        requestQueue = Volley.newRequestQueue(getApplicationContext());
 
         mService = Common.getIGoogleAPI();
 
@@ -113,6 +128,8 @@ public class CustommerCall extends AppCompatActivity {
                 intencion.putExtra("lng", lng);
                 intencion.putExtra("customerId", customerId);
 
+                agregarCarrera(lat, lng);
+
                 if(!TextUtils.isEmpty(customerId)) {
                     notificationBooking(customerId, "Aceptado", "El Taxi llegará en " + tiempo);
                     tiempo = "";
@@ -135,6 +152,39 @@ public class CustommerCall extends AppCompatActivity {
             getDirection(lat, lng);
         }
 
+    }
+
+    private void agregarCarrera(Double latitud, Double longitud) {
+        HashMap<String, String> mapa = new HashMap<>();
+        mapa.put("nombre",  direccion);
+        mapa.put("latitud", String.valueOf(latitud));
+        mapa.put("longitud", String.valueOf(longitud));
+
+        VolleyPeticion<MensajeBackJson> agregarDir = Conexion.registrarDireccion(
+                getApplicationContext(),
+                mapa,
+                new com.android.volley.Response.Listener<MensajeBackJson>() {
+                    @Override
+                    public void onResponse(MensajeBackJson response) {
+                        if (response != null && ("FD".equalsIgnoreCase(response.siglas)
+                                || "DNF".equalsIgnoreCase(response.siglas))) {
+                            Log.e("DIRECCION", response.mensaje);
+                        } else {
+                            Log.e("DIRECCION", "Se agregó correctamente");
+                        }
+                    }
+                },
+                new com.android.volley.Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("Error", error.toString());
+
+                        return;
+                    }
+                }
+        );
+
+        requestQueue.add(agregarDir);
     }
 
     /***
@@ -221,6 +271,7 @@ public class CustommerCall extends AppCompatActivity {
 
                         String address = legsObject.getString("end_address");
                         txt_address.setText(address);
+                        direccion = address;
 
                     }catch (Exception e){
 
