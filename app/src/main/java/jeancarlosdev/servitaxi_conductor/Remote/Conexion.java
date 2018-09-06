@@ -198,5 +198,26 @@ public class Conexion {
 
         return request;
     }
+
+    public static VolleyPeticion<MensajeBackJson> retornarExternalUnidad(@NonNull final Context contexto,
+                                                                     @NonNull final HashMap mapa,
+                                                                     @NonNull Response.Listener<MensajeBackJson> response_Listener,
+                                                                     @NonNull Response.ErrorListener errorListener){
+
+        final String url = API_URL + "unidad/inicioSesion";
+
+        VolleyPeticion request = new VolleyPeticion(contexto,
+                Request.Method.POST,
+                url,
+                mapa,
+                HashMap.class,
+                String.class,
+                response_Listener,
+                errorListener);
+
+        request.setResponseClass(MensajeBackJson.class);
+
+        return request;
+    }
 }
 

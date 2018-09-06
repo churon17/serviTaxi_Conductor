@@ -34,6 +34,7 @@ public class Common {
      */
     public static Conductor currentUser;
 
+    public static String external_unidad = "ext";
 
     /***
      * Variable estática de tipo LOCATION utilizada para mantener constantemente el valor de latitud y longitud del conductor.

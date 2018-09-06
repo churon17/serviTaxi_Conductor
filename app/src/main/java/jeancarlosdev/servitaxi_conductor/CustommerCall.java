@@ -1,17 +1,12 @@
 package jeancarlosdev.servitaxi_conductor;
 
-import android.animation.ValueAnimator;
 import android.content.Intent;
-import android.graphics.Color;
-import android.location.Geocoder;
 import android.media.MediaPlayer;
-import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,23 +14,12 @@ import android.widget.Toast;
 import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
-import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.JointType;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.maps.model.SquareCap;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.HashMap;
-import java.util.List;
 
-import io.paperdb.Paper;
 import jeancarlosdev.servitaxi_conductor.Common.Common;
 import jeancarlosdev.servitaxi_conductor.Modelos.FCMResponse;
 import jeancarlosdev.servitaxi_conductor.Modelos.MensajeBackJson;
@@ -84,6 +68,7 @@ public class CustommerCall extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
 
         CalligraphyConfig.initDefault(new CalligraphyConfig.
@@ -128,7 +113,7 @@ public class CustommerCall extends AppCompatActivity {
                 intencion.putExtra("lng", lng);
                 intencion.putExtra("customerId", customerId);
 
-                agregarCarrera(lat, lng);
+                agregarDireccion(lat, lng);
 
                 if(!TextUtils.isEmpty(customerId)) {
                     notificationBooking(customerId, "Aceptado", "El Taxi llegará en " + tiempo);
@@ -154,11 +139,13 @@ public class CustommerCall extends AppCompatActivity {
 
     }
 
-    private void agregarCarrera(Double latitud, Double longitud) {
+    private void agregarDireccion(Double latitud, Double longitud) {
         HashMap<String, String> mapa = new HashMap<>();
         mapa.put("nombre",  direccion);
         mapa.put("latitud", String.valueOf(latitud));
         mapa.put("longitud", String.valueOf(longitud));
+
+        Log.e("************CUSTOMER**", customerId);
 
         VolleyPeticion<MensajeBackJson> agregarDir = Conexion.registrarDireccion(
                 getApplicationContext(),

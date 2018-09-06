@@ -312,52 +312,76 @@ public class Login_1 extends AppCompatActivity {
 
                         mapa.put("clave", etxtContrasenaInicio.getText().toString());
 
-                        //IniciarSesion.
-
-                        auth.signInWithEmailAndPassword(etxtEmailInicio.getText().toString(),
-                                etxtContrasenaInicio.getText().toString())
-                                .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                        VolleyPeticion<MensajeBackJson> inicio = Conexion.retornarExternalUnidad(
+                                getApplicationContext(),
+                                mapa,
+                                new Response.Listener<MensajeBackJson>() {
                                     @Override
-                                    public void onSuccess(AuthResult authResult) {
-                                        dialogoEspera.dismiss();
+                                    public void onResponse(final MensajeBackJson response) {
 
-                                        FirebaseDatabase.getInstance().getReference(Common.conductor_tb1)
-                                                .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
-                                                .addListenerForSingleValueEvent(new ValueEventListener() {
-                                                    @Override
-                                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                                        Common.currentUser = dataSnapshot.getValue(Conductor.class);
-                                                        Paper.book().write(Common.conductor, etxtEmailInicio.getText().toString());
-                                                        Paper.book().write(Common.password, etxtContrasenaInicio.getText().toString());
+                                        if(response!= null && response.mensaje.equals("peracion exitosa")){
 
-                                                        startActivity(new Intent(Login_1.this
-                                                                , Bienvenido.class));
+                                            auth.signInWithEmailAndPassword(etxtEmailInicio.getText().toString(),
+                                                    etxtContrasenaInicio.getText().toString())
+                                                    .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                                                        @Override
+                                                        public void onSuccess(AuthResult authResult) {
+                                                            dialogoEspera.dismiss();
 
-                                                        finish();
+                                                            FirebaseDatabase.getInstance().getReference(Common.conductor_tb1)
+                                                                    .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                                                                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                        @Override
+                                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                            Common.currentUser = dataSnapshot.getValue(Conductor.class);
+                                                                            Paper.book().write(Common.conductor, etxtEmailInicio.getText().toString());
+                                                                            Paper.book().write(Common.password, etxtContrasenaInicio.getText().toString());
+                                                                            Paper.book().write(Common.external_unidad, response.siglas);
 
-                                                    }
+                                                                            startActivity(new Intent(Login_1.this
+                                                                                    , Bienvenido.class));
 
-                                                    @Override
-                                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                                                                            finish();
 
-                                                    }
-                                                });
+                                                                        }
 
+                                                                        @Override
+                                                                        public void onCancelled(@NonNull DatabaseError databaseError) {
 
+                                                                        }
+                                                                    });
+                                                        }
+                                                    }).addOnFailureListener(new OnFailureListener() {
+                                                @Override
+                                                public void onFailure(@NonNull Exception e) {
+                                                    dialogoEspera.dismiss();
+                                                    Snackbar.make(layoutPrincipal,
+                                                            "Error" + e.getMessage(),
+                                                            Snackbar.LENGTH_SHORT).show();
+
+                                                    btnSignIn.setEnabled(true);
+
+                                                    btnSignIn.setEnabled(true);
+                                                }
+                                            });
+                                        }
                                     }
-                                }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                dialogoEspera.dismiss();
-                                Snackbar.make(layoutPrincipal,
-                                        "Error" + e.getMessage(),
-                                        Snackbar.LENGTH_SHORT).show();
+                                },
+                                new Response.ErrorListener() {
+                                    @Override
+                                    public void onErrorResponse(VolleyError error) {
 
-                                btnSignIn.setEnabled(true);
+                                        VolleyTiposError errors = VolleyProcesadorResultado.parseErrorResponse(error);
 
-                                btnSignIn.setEnabled(true);
-                            }
-                        });
+                                        Toast.makeText(Login_1.this, error.toString(), Toast.LENGTH_SHORT).show();
+
+                                        return;
+                                    }
+                                }
+                        );
+
+                        requestQueue.add(inicio);
+
                     }
                 });
 
@@ -418,7 +442,7 @@ public class Login_1 extends AppCompatActivity {
 
         if (listaCooperativas.length > 0) {
 
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>
+            ArrayAdapter<String> adapter = new ArrayAdapter<>
                     (register_Layout.getContext(), android.R.layout.simple_spinner_item, listaCooperativas);
 
 
